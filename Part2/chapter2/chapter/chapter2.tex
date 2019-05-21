@@ -1,0 +1,25 @@
+\chapter{Input Datasets}
+Originally the project was going to look at classifying some of the data made available through the DigitalGlobe open data programme, specifically the data released around the Californian Wildfires in 2018. However, there is no ground truth data associated with these image files and it would have been very time consuming to create this dataset. There are many open-source datasets available to the scientific community to build and train their machine learning models on. These datasets have normally been created as part of an online competition and come with training and testing datasets. The dataset chosen to train and test the model is the one outlined in \cite{maggiori17a}, the Inria Aerial Image Labeling Dataset. More details can be found in Table \ref{tab.datasets}.
+\begin{sidewaystable}
+    \centering
+    \caption{Summary of key datasets used for this project.}
+\begin{tabular}{ p{2.4in} p{3.3in} p{2.6in} }\toprule
+\textbf{Data Source}& \textbf{Key Features} & \textbf{Pre-Processing Steps} \\ \toprule
+Inria Aerial Image Labeling Dataset taken from work done by \cite{maggiori17a}. All imagery was constructed from public domain imagery and public domain official building footprints. &Training data of 180 colour image tiles with associated ground truth mask of building or not building \newline Test data of 180 colour image tiles \newline Images cover dissimilar urban settings from densely populated to sparsely, across the USA and Europe.\newline Each tile is 5000x5000 pixels, with a pixel size of 30cm, covering an area of 1.5km$^2$. 
+& Data is already aerial orthorectified and comes with its own training data, no pre-processing steps required.  \\ \midrule
+VHR imagery from Digital Globe before and following the Californian Wildfire – 30cm resolution&
+Access to archived and up to date imagery following natural disasters to aid humanitarian efforts \newline
+30cm resolution \newline
+Covers a very large area of California \textbf{calculate areas from downloaded imagery} \newline
+Unfortunately there is no ground truth data available, a small portion of the data will need to be manually mapped in order to validate the model.
+& Imagery comes pre-processed. Including, orthorectification, atmospheric compensation, dynamic range adjustment and pan-sharpening. \newline
+Data can be web scraped in order to bulk the download.\newline
+Metadata includes sensor, date of acquisition, catalogue identifier and pre- vs post- even identifier.
+\\ \midrule
+Kenyan time series dataset - provided by Watamough.& 
+Data set has imagery from four time periods with different vegetation conditions. \newline
+10x10km tiles, with everything with them in classified. Whatever was not classified has been manually classified by hand to make sure it is 100\% accurate. \newline &
+Data is already pre-processed with top of atmosphere corrections in place. A proportion of the data will be kept back in order to validate the model.\\ \bottomrule
+\end{tabular}
+\label{tab.datasets}
+\end{sidewaystable}

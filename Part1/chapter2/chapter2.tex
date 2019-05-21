@@ -1,0 +1,34 @@
+\documentclass[12pt,english,a4paper]{report}
+\input{common/packages.tex}
+\input{common/definitions.tex}
+
+\setlength{\textheight}{24cm}
+\setlength{\headsep}{0cm}
+
+\newcommand{\dir}{chapter}
+
+\begin{document}
+\title{Chapter 2}
+\author{Thomas Richmond}
+\date{
+  \today\\
+  \vspace{2cm}
+  {\centering\footnotesize\begin{tabular}[c]{c}
+      \includegraphics[height=3cm]{preface/2Line2ColCMYK_CS3.pdf}\\
+      School of GeoSciences\\
+      Geography Institute\\
+      Drummond Street\\ 
+      Edinburgh, EH8 9XP\\
+      Scotland
+    \end{tabular}}
+  }
+\maketitle
+\tableofcontents
+\input{\dir/chapter2.tex}
+%\clearpage
+%\listoffigures
+%\listoftables
+%\listofalgorithms
+%\newpage
+%\bibliography{}
+\end{document}
