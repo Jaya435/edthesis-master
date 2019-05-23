@@ -1,11 +1,11 @@
 \documentclass[12pt,english,a4paper]{report}
 
 \input{common/packages.tex}
-\input{common/definitions.tex}
 
+\input{common/definitions.tex}
 \setlength{\textheight}{24cm}
 \setlength{\headsep}{0cm}
-
+\addbibresource{myrefs.bib}
 \newcommand{\dir}{chapter}
 
 \begin{document}
@@ -26,7 +26,12 @@
   }
 \maketitle
 \tableofcontents
+\begin{refsection}
 \input{\dir/chapter3.tex}
+
+\printbibliography[heading=bibintoc,title={References}]
+\end{refsection}
+
 %\clearpage
 %\listoffigures
 %\listoftables
