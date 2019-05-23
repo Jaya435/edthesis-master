@@ -3,7 +3,7 @@ This chapter will break down the process needed to build, train and test a convo
 \textbf{http://cs231n.github.io/convolutional-networks/}
 \paragraph{}
 Convolutional Neural Networks or CNNs are similar to neural networks as they are made up of neurons with learnable weights and biases, just like random forests (RF) and support vector machine (SVM) learning. Each neuron receives an input, performs a dot product and then optionally follows with a non-linear function. Non-linear functions work like a sprinkler system in an agricultural field, which works to randomly spray the water in any direction so the whole field is targeted rather than just one straight line. 
-\par Compared to regular neural networks, CNNs explicitly assume the inputs are images allowing certain properties to be encoded. Regular neural networks transform images through a series of hidden layers. Each layer is made up of neurons with each neuron connected to every neuron in the the previous layer but each neuron in one layer is not connect to any other. The last fully connected layer contains the class score for each pixel, indicating what class that class is most likely to belong to. Regular networks do not scale well to images that have multiple channels of information. For remote sensing, in most cases the imagery that is being looked at will have at least three layers of information, if not more. In a regular network, a image that is 256x256 pixels with three channels equates to 196,000 weights to calculate, for just one neuron. This requires lots of parameters and can lead to overfitting. \par
+\par Compared to regular neural networks, CNNs explicitly assume the inputs are images allowing certain properties to be encoded. Regular neural networks transform images through a series of hidden layers. Each layer is made up of neurons with each neuron connected to every neuron in the the previous layer but each neuron in one layer is not connect to any other neuron in the same layer. The last fully connected layer contains the class score for each pixel, indicating what class that class is most likely to belong to. Regular networks do not scale well to images that have multiple channels of information. For remote sensing, in most cases the imagery that is being looked at will have at least three layers of information, if not more. In a regular network, a image that is 256x256 pixels with three channels equates to 196,000 weights to calculate, for just one neuron. This requires lots of parameters and can lead to overfitting. \par
 CNNs take advantage of the 3D volume of neurons so each neuron has height, width and depth dimensions where the depth corresponds to the number of bands in the image (Figure \ref{fig.convolve_data}). The network then works to convolve the information to allow the image to have a single vector class score that is arranged along the depth dimension. To summarise a CNN is a sequence of layers where each layer transforms one volume of activations to another through a differential function. For a generic CNN there is a convolutional layer, a pooling layer and a fully connected layer, these layers are then stacked to form a convolutional neural network.
 \begin{figure}[H]
 \centering
@@ -32,7 +32,7 @@ CNNs take advantage of the 3D volume of neurons so each neuron has height, width
 \end{itemize}
 \par
 The network transforms the original image layer by layer from the original pixel values into the class scores. The CONV layer and the FC layers are functions of the activation in the input volume as well as the weights and biases of the neurons. The RELU and POOL layers always implement a fixed function. The parameters of CONV and FC are trained with gradient descent so that the class scores are consistent with the labels in the training image. In terms of our training data, the predicted class score is compared to the binary classification image to determine whether or not the network has accurately predicted the pixel value.
-
+\par
 \section{Construct the Neural Network}
 Before beginning data loading and processing, a generic neural network is created to process the data. This is constructed in a way that can handle any datasets with a 3-channel RGB image with an associated binary mask. The next sub-section will outline architecture needed to do this and provide an in depth discussion.
 \subsection{\textbf{CONV} layer}
@@ -75,9 +75,9 @@ Batch normalisation is a function that is used to correct for the effect of chan
 \par
 \hl{Useful explanation of batch norm: https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html}
 \subsection{Activation Layer}
-There are many different types of activation functions that can be used with CNNs. Some of functions are better suited to different applications. ReLU(Rectified Linear Unit) is the most reliable and can be used as a good approximation. \par
+There are many different types of activation functions that can be used with CNNs. Some of functions are better suited to different applications. ReLU(Rectified Linear Unit) is the most reliable and can be used as a good approximation for all applications. \par
 Activation functions introduce non-linear properties on the network and convert an input signal to an output one. They sum the product of the inputs and their corresponding weights and apply the function to get the output and feed it as an input for the next layer. Without an activation function the output would be a linear function. These are limited in their complexity and cannot learn complex functional maps from the data. A neural network without an activation function is simply a linear regression model. Activation functions allow the user to represent non-linear arbitrary functional mappings between inputs and outputs. \par
-\begin{figure}
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{\dir/figs/relu.jpeg}
     \caption{ReLu function.}
@@ -149,7 +149,7 @@ class BuildingsDataset(Dataset):
     def __len__(self):
         return len(self.image_paths)
 \end{lstlisting}
-There is an additional transformation that is applied to the mask. The binary mask comes as one layer where the minimum value corresponds to what is not of interest and the max value corresponds to where there is something of interest. The transform splits this single layer into two layers. In the first layer, where the value was minimum it now shows as max and the opposite is the case for the second layer (Figure \ref{fig.binary_mask}) . This is so that when a class probability is determined by the network this can then predict which layer the pixel is most likely to belong to. In essence this process has transformed the data into two classes rather than just one.
+There is an additional transformation that is applied to the mask. The binary mask comes as one layer where the minimum value corresponds to what is not of interest and the max value corresponds to where there is something of interest (Listing \ref{lst.transform} line 39). The transform splits this single layer into two layers. In the first layer, where the value was minimum it now shows as max and the opposite is the case for the second layer (Figure \ref{fig.binary_mask}) . This is so that when a class probability is determined by the network this can then predict which layer the pixel is most likely to belong to. In essence this process has transformed the data into two classes rather than just one.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{\dir/figs/binary_mask.png}
