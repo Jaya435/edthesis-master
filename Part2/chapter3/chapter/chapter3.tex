@@ -158,8 +158,8 @@ There is an additional transformation that is applied to the mask. The binary ma
 \end{figure}
 The transform function outputs an array with two item, where the first item is the image as a tensor and the second item is the associated binary mask as a tensor. This datatype is then ready to be loaded directly into the neural network.
 \subsection{Load the Data}
-PyTorch has a in-build dataloader class that is used to batch and load the data. It can even be used to load the data using GPU if the user had access to one. The data needs to be prepared in a certain way in order to be loaded through this class. The transform class prepares the data into this specific format so it can be bulk loaded into the network. The dataloader then batches, shuffles and loads the data, either in parallel or not, into the neural network for training. Figure \ref{fig.dataloader} shows how the data looks as it is being fed into the CNN. There is a randomly cropped RGB image with an associated binary mask, which is made up of two layers, the first layer being displayed as 1 where the class is, the second showing 1 where the class is not. 
-\begin{figure}
+PyTorch has a in-built dataloader class that is used to batch and load the data. It can even be used to load the data using GPU if the user had access to one. The data needs to be prepared in a certain way in order to be loaded through this class. The transform class prepares the data into this specific format so it can be bulk loaded into the network. The dataloader then batches, shuffles and loads the data, either in parallel or not, into the neural network for training. Figure \ref{fig.dataloader} shows how the data looks as it is being fed into the CNN. There is a randomly cropped RGB image with an associated binary mask, which is made up of two layers, the first layer being displayed as 1 where the class is, the second showing 1 where the class is not. 
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{\dir/figs/example_dataloader.png}
     \caption[Example of how the dataloader handles the data]{Example of how the dataloader handles the data. This image shows a random 128x128 crop from a random tile within the dataset. The dataloader constructs these paired images into a stack that can be defined by the user and optimised to reduce processing times. On the left is the RGB image, the middle shows as positive where there are buildings and the left shows as positive where buildings are not.}
@@ -172,9 +172,9 @@ Once the network has been constructed the user needs to tune the hyperparameters
     \item The batch size
     \item The learning rate for the optimiser.
 \end{itemize}
-These will be discussed further in the next section.
+These will be discussed further in the next section. There are other hyperparameters that can be adjusted but considering the time and resources available this was not possible within the scope of this thesis.
 \subsection{Convolution Depth}
-The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be.
+The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be. This variable was mentioned in 
 \subsection{Batch Size}
 \subsection{Learning Rate and Optimizer}
 
