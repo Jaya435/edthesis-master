@@ -159,7 +159,12 @@ There is an additional transformation that is applied to the mask. The binary ma
 The transform function outputs an array with two item, where the first item is the image as a tensor and the second item is the associated binary mask as a tensor. This datatype is then ready to be loaded directly into the neural network.
 \subsection{Load the Data}
 PyTorch has a in-build dataloader class that is used to batch and load the data. It can even be used to load the data using GPU if the user had access to one. The data needs to be prepared in a certain way in order to be loaded through this class. The transform class prepares the data into this specific format so it can be bulk loaded into the network. The dataloader then batches, shuffles and loads the data, either in parallel or not, into the neural network for training. 
-
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{\dir/figs/example_dataloader.png}
+    \caption{Caption}
+    \label{fig:my_label}
+\end{figure}
 \section{Training the Network}
 Once the network has been constructed the user needs to tune the hyperparameters in order to get the best loss and learning rate from their network in the shortest possible time. This is the most time consuming and frustrating part of the process as there are many different parts of the network that can be adjusted to produce different results. The three hyperparameters that need to be adjusted are as follows:
 \begin{itemize}
