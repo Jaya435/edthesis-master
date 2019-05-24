@@ -122,7 +122,7 @@ class SegBlockDecoder(nn.Module):
         return y
 \end{lstlisting}
 It is common for most CNNs to use a fully connected layer in order to transform the data so that it is useful for the user. This thesis proposes an alternative method that chooses to use a deconvolving process that mirrors what has occurred during the convolutional stage. The architecture of this is shown in Listing \ref{lst.decoder}, where in line 5 we see the use of the ConvTranspose2d function in order to deconvolve the data. This is again striving to make the CNN as simple as possible in order to make it as generative as possible (\cite{Springenberg14}). Pooling layers are not invertable in this process and this is why they have not been chosen for this architecture.
-\subsection{Neural Network}
+\subsection{Neural Network}\label{sub.CNN}
 In Listings \ref{lst.encoder} and \ref{lst.decoder} we have seen the architecture for the individual layers, the final stage is to tie these functions together into a final convolutional neural network as shown in Listing \ref{lst.CNN}.
 \begin{lstlisting}[language=Python, caption = Fully connected Convolutional Neural Network, label={lst.CNN}]
 class Net(nn.Module):
@@ -233,14 +233,44 @@ PyTorch has a in-built dataloader class that is used to batch and load the data.
 \section{Training the Network}
 Once the network has been constructed the user needs to tune the hyperparameters in order to get the best loss and learning rate from their network in the shortest possible time. This is the most time consuming and frustrating part of the process as there are many different parts of the network that can be adjusted to produce different results. The three hyperparameters that need to be adjusted are as follows:
 \begin{itemize}
-    \item The number of depth of the convolutional layer
+    \item The number of filters in the convolutional layers
     \item The batch size
-    \item The learning rate for the optimiser.
+    \item The optimiser and the learning rate for said optimiser.
 \end{itemize}
 These will be discussed further in the next section. There are other hyperparameters that can be adjusted but considering the time and resources available this was not possible within the scope of this thesis.
 \subsection{Convolution Depth}
-The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be. This variable was mentioned in 
+The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be. This variable was mentioned in Section \ref{sub.CNN}, where self.cr was the number of filters to be determined by the user.
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/learning_rate1net_size4batch8epochs100.png}
+\caption{}
+\label{fig.filter4l}
+\end{subfigure}%
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/{learning_rate1net_size8batch8epochs100}.png}
+\caption{}
+\label{fig.filter8}
+\end{subfigure}
+\bigskip
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/{learning_rate1net_size16batch8epochs100}.png}
+\caption{}
+\label{fig.filter16}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/{learning_rate1net_size32batch8epochs100}.png}
+\caption{}
+\label{fig.filter32}
+\end{subfigure}
+\caption[Effect of adjusting the filter size on Loss of network]{All four graphs show how adjusting the filter size effects the loss rate of the network after each epoch. Clearly shows how a smaller learning rate leads to smaller adjustments between each epoch.}
+\label{fig.filter_size}
+\end{figure}
 \subsection{Batch Size}
+The batch size changes the size of the stack of data that is being fed into the neural network.
+
 \subsection{Learning Rate and Optimizer}
 The optimiser works to adjust the weights of the model before another training run is performed in order to decrease the loss of the network after each run. 
 The standard optimiser for CNNs is Stochastic Gradient Descent, for this project a slight variation on this has been used, which is the ADAM optimiser. This works in a similar way but has some clever inbuilt variables that prevent the optimiser becoming stuck and the loss rate converging.
@@ -269,7 +299,7 @@ The standard optimiser for CNNs is Stochastic Gradient Descent, for this project
 \caption{}
 \label{fig.lr0.0001}
 \end{subfigure}
-\caption[Example of pooling and Max Pool function]{On the left we observe how the spatial dimensions of the input layer are decreased but the depth dimension remains the same. On the right we see how Max Pool assigns the greatest value to the new aggregated pixel.}
+\caption[Effect of adjusting learning rate on Loss of network]{All four graphs show how adjusting the learning rate of the optimiser effects the loss rate of the network after each epoch. Clearly shows how a smaller learning rate leads to smaller adjustments between each epoch.}
 \label{fig.learning_rate}
 \end{figure}
 
