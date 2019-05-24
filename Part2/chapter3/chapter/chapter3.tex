@@ -1,6 +1,5 @@
 \chapter{Convolutional Neural Network}
 This chapter will break down the process needed to build, train and test a convolutional neural network with PyTorch. The PyTorch library comes with a lot of great tutorials that work well on the large datasets that they provide in order to load the data in bulk and train your neural network using GPUs to parallelise the process. However, the data that most remote sensing scientists have is not in tiles with one land use class per tile, but rather in extremely large images with lots of varied land use across the field of view. There are explanations on how to use this sort of varied data in order to train the model and this thesis aims to standardise this procedure for a binary classification. \newline
-\textbf{http://cs231n.github.io/convolutional-networks/}
 \paragraph{}
 Convolutional Neural Networks or CNNs are similar to neural networks as they are made up of neurons with learnable weights and biases, just like random forests (RF) and support vector machine (SVM) learning. Each neuron receives an input, performs a dot product and then optionally follows with a non-linear function. Non-linear functions work like a sprinkler system in an agricultural field, which works to randomly spray the water in any direction so the whole field is targeted rather than just one straight line. 
 \par Compared to regular neural networks, CNNs explicitly assume the inputs are images allowing certain properties to be encoded. Regular neural networks transform images through a series of hidden layers. Each layer is made up of neurons with each neuron connected to every neuron in the the previous layer but each neuron in one layer is not connect to any other neuron in the same layer. The last fully connected layer contains the class score for each pixel, indicating what class that class is most likely to belong to. Regular networks do not scale well to images that have multiple channels of information. For remote sensing, in most cases the imagery that is being looked at will have at least three layers of information, if not more. In a regular network, a image that is 256x256 pixels with three channels equates to 196,000 weights to calculate, for just one neuron. This requires lots of parameters and can lead to overfitting. \par
@@ -24,11 +23,11 @@ CNNs take advantage of the 3D volume of neurons so each neuron has height, width
 
 \begin{itemize}
     
-    \item \hl{The \textbf{input} layer holds the raw pixel values, for this architecture that means 256x256x3 (width x height x number of bands).}
-    \item \hl{The \textbf{convolutional (CONV)} layer computes the output of the neurons that are connected to local regions, each by computing a dot product between their weights and a small region they are connected to in the input volume.}
-    \item \hl{The \textbf{RELU} layer applies an element-wise activation function, resulting in thresholding at 0, leaving the size unchanged.}
-    \item \hl{The \textbf{pooling (POOL)} layer performs a downsampling along the width and height dimensions.}
-    \item \hl{The \textbf{fully connected (FC)} layer computes the class score, as this architecture is looking at a binary classification, this is either of 2 classes, the object of interest or not.} 
+    \item The \textbf{input} layer holds the raw pixel values, for this architecture that means 256x256x3 (width x height x number of bands).
+    \item The \textbf{convolutional (CONV)} layer computes the output of the neurons that are connected to local regions, each by computing a dot product between their weights and a small region they are connected to in the input volume.
+    \item The \textbf{RELU} layer applies an element-wise activation function, resulting in thresholding at 0, leaving the size unchanged.
+    \item The \textbf{pooling (POOL)} layer performs a downsampling along the width and height dimensions.
+    \item The \textbf{fully connected (FC)} layer computes the class score, as this architecture is looking at a binary classification, this is either of 2 classes, the object of interest or not. 
 \end{itemize}
 \par
 The network transforms the original image layer by layer from the original pixel values into the class scores. The CONV layer and the FC layers are functions of the activation in the input volume as well as the weights and biases of the neurons. The RELU and POOL layers always implement a fixed function. The parameters of CONV and FC are trained with gradient descent so that the class scores are consistent with the labels in the training image. In terms of our training data, the predicted class score is compared to the binary classification image to determine whether or not the network has accurately predicted the pixel value.
@@ -85,18 +84,84 @@ Activation functions introduce non-linear properties on the network and convert 
 \end{figure}
 ReLU corrects a value to be 0 when $<$ 0 and then linear with slope of 1 when x $>$ 0. Figure \ref{fig.relu} shows the function in graphical form. \citet{krizhevsky17} shows the ReLU functions to be 6 times faster than Tanh. 
 \subsection{Pool Layer}
-
-\subsection{Fully Connected}
+It is common for CNNs to insert a pooling layer in between successive convolutional layers. This aggregates the data and reduce the parameters and computation for the network. Pooling operates independently on every depth slice (image band) and resizes it spatially using the max function. This is analogous to raster resampling. Most commonly this process is done using a 2x2 moving filter with a stride of two that downsamples every depth slice by a factor of two. The depth dimension of the data remains unaffected by this process (Figure \ref{fig.pooling}).
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/pool.jpeg}
+\caption{}
+\label{fig.pool}
+\end{subfigure}%
+\qquad
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/maxpool.jpeg}
+\caption{}
+\label{fig.maxpool}
+\end{subfigure}
+\caption[Example of pooling and Max Pool function]{On the left we observe how the spatial dimensions of the input layer are decreased but the depth dimension remains the same. On the right we see how Max Pool assigns the greatest value to the new aggregated pixel.}
+\label{fig.pooling}
+\end{figure}
+\par
+For the CNN implemented during this project no pool layer was included. Discarding pool layers has been found to be important when training generative models and the future looks to be moving towards architectures with fewer to no pooling layers (\cite{Springenberg14}). As this thesis is aiming to produce a reusable workflow for a CNN, pool layers were not included. 
 
 \subsection{Decoder}
+So far we have discussed how the neural network has convolved the data and produced activation layers corresponding to what class the data belongs to. The next step is to backpropagate this data in order to output an image where the network has assigned a most likely class for each pixel based on the weights within the network. 
+\begin{lstlisting}[language=Python, caption = Decoder architecture, label={lst.decoder}]
+class SegBlockDecoder(nn.Module):
+    def __init__(self,in_channel,out_channel, kernel=4,stride=2,pad=1):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.ConvTranspose2d(
+                in_channel,out_channel,kernel,stride=stride,padding=pad,bias=False),
+            nn.BatchNorm2d(out_channel),
+            nn.ReLU(True)
+        )
 
+    def forward(self, x):
+        y=self.model(x)
+        return y
+\end{lstlisting}
+It is common for most CNNs to use a fully connected layer in order to transform the data so that it is useful for the user. This thesis proposes an alternative method that chooses to use a deconvolving process that mirrors what has occurred during the convolutional stage. The architecture of this is shown in Listing \ref{lst.decoder}, where in line 5 we see the use of the ConvTranspose2d function in order to deconvolve the data. This is again striving to make the CNN as simple as possible in order to make it as generative as possible (\cite{Springenberg14}). Pooling layers are not invertable in this process and this is why they have not been chosen for this architecture.
 \subsection{Neural Network}
+In Listings \ref{lst.encoder} and \ref{lst.decoder} we have seen the architecture for the individual layers, the final stage is to tie these functions together into a final convolutional neural network as shown in Listing \ref{lst.CNN}.
+\begin{lstlisting}[language=Python, caption = Fully connected Convolutional Neural Network, label={lst.CNN}]
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.cr = 32
+        self.encoder = nn.Sequential(
+            SegBlockEncoder(in_channel=3,out_channel=self.cr),
+            SegBlockEncoder(in_channel=self.cr,out_channel=self.cr*2),
+            SegBlockEncoder(in_channel=self.cr*2,out_channel=self.cr*4),
+            SegBlockEncoder(in_channel=self.cr*4,out_channel=self.cr*8),
+            SegBlockEncoder(in_channel=self.cr*8,out_channel=self.cr*16)
+        )
+        
+        self.decoder = nn.Sequential(
+            SegBlockDecoder(in_channel=self.cr*16, out_channel=self.cr*8),
+            SegBlockDecoder(in_channel=self.cr*8, out_channel=self.cr*4),
+            SegBlockDecoder(in_channel=self.cr*4, out_channel=self.cr*2),
+            SegBlockDecoder(in_channel=self.cr*2,out_channel=self.cr),
+            SegBlockDecoder(in_channel=self.cr, out_channel= 2)
+            )
+        
+        self.output = nn.Softmax(dim = 1)
+
+    def forward(self,x):
+        x1 = self.encoder(x)
+        x2 = self.decoder(x1)
+        y = self.output(x2)
+        return y
+\end{lstlisting}
+For this architecture there are five layers for the forward pass, and five layers for the mirrored backward pass. In Listing \ref{lst.CNN} line 4 self.cr corresponds to the number of filters in the convolutional layer. This is a hyperparameter and needs to be adjusted in order to fine tune the model to optimise the results. The softmax function on line 21 is a binary linear regression classified for multiple classes. Allows the user to compute the probability of a pixel belonging to one class or another.
+
+
 \section{Data Processing and and Loading}
 For the a user wanting to load and train a network they first need to prepare their data so that it is in the right format to be read by the network. In remote sensing, a user may commonly have one image of 30,000x30,000 pixels if they have a 10x10km tile at ~30cm resolution. This needs to be transformed and reduced in size to train a network. The networks would not be trained very well if just one image was fed in, especially at the extreme size of 30,000x30,000 pixels. The first step of the process is to transform and crop this data so that only a small section of the image is being fed into the network. The transform class used for this function can be found below (Listing \ref{lst.transform}).
 \subsection{Convert image data to correct format}
 In order for the image data to work within PyTorch it needs to be in the PIL format. The training and test dataset used for the creating of the workflow were in .tif format and so no conversion was needed. If the data type the user intended to use was not in the PIL format, a conversion would be necessary.
 \subsection{Transform the Data}
-Transforms on the data need to be performed on both the image layer and thr binary mask in tandem. In order to do this a custom transform class was written to ensure that these transformed were mirrored and the two layers of information remained paired and undistorted.
+Transforms on the data need to be performed on both the image layer and the binary mask in tandem. In order to do this a custom transform class was written to ensure that these transformed were mirrored and the two layers of information remained paired and not distorted.
 The arguments for the transform class are lists of all the users image and associated and binary mask files. The user can remove the comment at Listing \ref{lst.transform} line 16-19 if their training data is not all of the same dimensions. The class then proceeds to crop, horizontally flip, vertically flip, and eventually transform the data arrays into PyTorch tensors that can be fed into the neural network. \par 
  \begin{lstlisting}[language=Python, caption = Transform Class, label={lst.transform}]
 class BuildingsDataset(Dataset):
@@ -177,6 +242,7 @@ These will be discussed further in the next section. There are other hyperparame
 The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be. This variable was mentioned in 
 \subsection{Batch Size}
 \subsection{Learning Rate and Optimizer}
-
+The optimiser works to adjust the weights of the model before another training run is performed in order to decrease the loss of the network after each run. 
+The standard optimiser for CNNs is Stochastic Gradient Descent, for this project a slight variation on this has been used, which is the ADAM optimiser. This works in a similar way but has some clever inbuilt variables that prevent the optimiser becoming stuck and the loss rate converging.
 
 \section{Testing the Network}
