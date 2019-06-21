@@ -1,7 +1,7 @@
 \chapter{Methodology}
 
 \section{Data Selection}
-The first point for considering what dataset to use for this project was to identify a product that was open-source, and with a resolution less than one metre. It had to comprise of an RGB image with an associated mask layer representing the feature or features of interest. In Richmond (2019) Table \ref{tab.datasets}, displays all the datasets considered can be found with justifications for each. For this thesis the INRIA Building Dataset was used, this dataset was developed for the project outlined in \cite{maggiori17a}. Their dataset was created in order to ensure it contained recent orthorectified imagery; recent official cadastral records; precise registration between orthorectified imagery and cadastral records; open access data, for both imagery and cadaster; and coverage that varied across urban landscapes and illumination. \cite{maggiori17a} found that there were certain areas in Austria and the US that satisfied these requirements and they focused on zones where reference data and images were available. The US imagery was provided at either 15 or 30cm resolutions with three to four spectral bands and the Austrian data contains three bands ar a resolution of 10 or 20 cm. They built the dataset to be consistent at 30 cm and RGB by using average re-sampling where needed. For there feature mask they considered two classes, \textit{building} and \textit{not building}. Once this was done they visually inspected the imagery to ensure the cadaster datasets were properly aligned with the imagery, removing cities where irregular shifts had occurred. 
+The first point for considering what dataset to use for this project was to identify a product that was open-source, and with a resolution less than one metre. It had to comprise of an RGB image with an associated mask layer representing the feature or features of interest. In \cite{Richmond19b} Table \ref{tab.datasets}, displays all the datasets considered can be found with justifications for each. For this thesis the INRIA Building Dataset was used, this dataset was developed for the project outlined in \cite{maggiori17a}. Their dataset was created in order to ensure it contained recent orthorectified imagery; recent official cadastral records; precise registration between orthorectified imagery and cadastral records; open access data, for both imagery and cadaster; and coverage that varied across urban landscapes and illumination. \cite{maggiori17a} found that there were certain areas in Austria and the US that satisfied these requirements and they focused on zones where reference data and images were available. The US imagery was provided at either 15 or 30cm resolutions with three to four spectral bands and the Austrian data contains three bands ar a resolution of 10 or 20 cm. They built the dataset to be consistent at 30 cm and RGB by using average re-sampling where needed. For there feature mask they considered two classes, \textit{building} and \textit{not building}. Once this was done they visually inspected the imagery to ensure the cadaster datasets were properly aligned with the imagery, removing cities where irregular shifts had occurred. 
 
 \begin{table}[htbp]
 \centering
@@ -25,14 +25,14 @@ Table \ref{tab.inria_dataset} depicts the regions the regions included in the da
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=1\textwidth]{\dir/figs/example_inria.png}
-    \caption[Examples from the INRIA Image Labelling Dataset]{Example of individual tiles from the train dataset and their corresponding reference data. Images show the full extent of the tiles, 5000px.}
+    \caption[Examples from the INRIA Image Labelling Dataset]{Example of individual tiles from the train dataset and their corresponding reference data. Images show a cutout of the full tiles, 1000 x 1000 px.}
     \label{fig.inria_dataset}
 \end{figure}
 
 
 
 \section{Model Architecture}
-For a more detailed discussion of how CNNs work refer to Richmond (2019), this section will discuss the architecture of the CNN and justify why certain elements were chosen over others. 
+This section will discuss the architecture of the CNN and justify why certain elements were chosen over others, for a more detailed discussion of how CNNs work please refer to \cite{Richmond19b}.
 \section{Performance}
 
 \section{Hyperparameter Tuning}
