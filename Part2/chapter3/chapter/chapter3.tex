@@ -1,5 +1,5 @@
 \chapter{Convolutional Neural Network}
-This chapter will break down the process needed to build, train and test a convolutional neural network with PyTorch. The PyTorch library comes with a lot of great tutorials that work well on the large datasets that they provide in order to load the data in bulk and train your neural network using GPUs to parallelise the process. However, the data that most remote sensing scientists have is not in tiles with one land use class per tile, but rather in extremely large images with lots of varied land use across the field of view. There are explanations on how to use this sort of varied data in order to train the model and this thesis aims to standardise this procedure for a binary classification. \newline
+This chapter will break down the process needed to build, train and test a convolutional neural network with PyTorch. The PyTorch library comes with a lot of great tutorials that work well on the large datasets that they provide in order to load the data in bulk and train your neural network using GPUs to parallelise the process. However, the data that most remote sensing scientists have is not in tiles with one land use class per tile, but rather in extremely large images with lots of varied land use across the field of view. There are explanations on how to use this sort of varied data in order to train the model and this thesis aims to standardise this procedure for a binary classification.
 \paragraph{}
 Convolutional Neural Networks or CNNs are similar to neural networks as they are made up of neurons with learnable weights and biases, just like random forests (RF) and support vector machine (SVM) learning. Each neuron receives an input, performs a dot product and then optionally follows with a non-linear function. Non-linear functions work like a sprinkler system in an agricultural field, which works to randomly spray the water in any direction so the whole field is targeted rather than just one straight line. 
 \par Compared to regular neural networks, CNNs explicitly assume the inputs are images allowing certain properties to be encoded. Regular neural networks transform images through a series of hidden layers. Each layer is made up of neurons with each neuron connected to every neuron in the the previous layer but each neuron in one layer is not connect to any other neuron in the same layer. The last fully connected layer contains the class score for each pixel, indicating what class that class is most likely to belong to. Regular networks do not scale well to images that have multiple channels of information. For remote sensing, in most cases the imagery that is being looked at will have at least three layers of information, if not more. In a regular network, a image that is 256x256 pixels with three channels equates to 196,000 weights to calculate, for just one neuron. This requires lots of parameters and can lead to overfitting. \par
@@ -70,8 +70,7 @@ Neurons in the output layer are controlled by the depth, stride and padding.
     \item Padding controls the number of layers of zeroes around the input volume. 
 \end{enumerate}
 \subsection{Batch Normalisation}
-Batch normalisation is a function that is used to correct for the effect of changing inputs as the network moves from layer to layer. \citet{ioffe15} were the first to recognise the affect that internal covariate shift had on deep learning. Within a single training set, the affect of internal covariate shift is not that significant but if the network is intended to predict values in another area, the effect can result in a very inaccurate model. Covariate shift is a result of bias in the dataset and a more in depth look and examples of the effect can be found in \citet{smola11}. By reducing the internal covariate shift, learning rates can be higher improving the time needed to achieve highly accurate models. The paper by \citet{ioffe15} claims that by using a batch normalisation function the validation error of the ImageNet classification can be dropped to below 5\% and this is better than the error expected from human raters. The normalisation occurs on the batch and is separated from the optimiser and gradient descent. This means that the parameters are adjusted independently of the optimiser and allows for faster learning rates. 
-\par
+Batch normalisation is a function that is used to correct for the effect of changing inputs as the network moves from layer to layer. \citet{ioffe15} were the first to recognise the affect that internal covariate shift had on deep learning. Within a single training set, the affect of internal covariate shift is not that significant but if the network is intended to predict values in another area, the effect can result in a very inaccurate model. Covariate shift is a result of bias in the dataset and a more in depth look and examples of the effect can be found in \citet{smola11}. By reducing the internal covariate shift, learning rates can be higher improving the time needed to achieve highly accurate models. The paper by \citet{ioffe15} claims that by using a batch normalisation function the validation error of the ImageNet classification can be dropped to below 5\% and this is better than the error expected from human raters. The normalisation occurs on the batch and is separated from the optimiser and gradient descent. This means that the parameters are adjusted independently of the optimiser and allows for faster learning rates. \par
 \hl{Useful explanation of batch norm: https://kratzert.github.io/2016/02/12/understanding-the-gradient-flow-through-the-batch-normalization-layer.html}
 \subsection{Activation Layer}
 There are many different types of activation functions that can be used with CNNs. Some of functions are better suited to different applications. ReLU(Rectified Linear Unit) is the most reliable and can be used as a good approximation for all applications. \par
@@ -237,9 +236,9 @@ Once the network has been constructed the user needs to tune the hyperparameters
     \item The batch size
     \item The optimiser and the learning rate for said optimiser.
 \end{itemize}
-These will be discussed further in the next section. There are other hyperparameters that can be adjusted but considering the time and resources available this was not possible within the scope of this thesis.
+These will be discussed further in the next section. There are other hyperparameters that can be adjusted but considering the time and resources available this was not possible within the scope of this thesis. The plots in the following section show the results of training the network on a small subset of the data in order to show the effects of changing different parameters. It allows for an exploration of which parameters work best for this specific dataset before scaling up for the whole datset and training as this will take a lot longer. 
 \subsection{Convolution Depth}
-The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be. This variable was mentioned in Section \ref{sub.CNN}, where self.cr was the number of filters to be determined by the user.
+The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be. This variable was mentioned in Section \ref{sub.CNN}, where self.cr was the number of filters to be determined by the user. Most CNNs tend to use numbers that are a power of 2 for all stages of implementation, as we can see from Figure \ref{fig.filter_size} larger filters result in generally lower losses for our data. 
 \begin{figure}[H]
 \centering
 \begin{subfigure}{0.45\textwidth}
@@ -265,15 +264,42 @@ The convolution depth determines the architecture of the neural network. The use
 \caption{}
 \label{fig.filter32}
 \end{subfigure}
-\caption[Effect of adjusting the filter size on Loss of network]{All four graphs show how adjusting the filter size effects the loss rate of the network after each epoch. Clearly shows how a smaller learning rate leads to smaller adjustments between each epoch.}
+\caption[Effect of adjusting the filter size on Loss of network]{All four graphs show how adjusting the filter size effects the loss rate of the network after each epoch. (d) has a filter size of 32 and the loss here is generally smaller than in the other examples.}
 \label{fig.filter_size}
 \end{figure}
 \subsection{Batch Size}
-The batch size changes the size of the stack of data that is being fed into the neural network.
-
+The batch size changes the size of the stack of data that is being fed into the neural network. A batch size of 1 will show a large fluctuation on the loss compared to a batch size the encompasses the whole dataset. A batch size that is the same size as the dataset should have small fluctuations in the loss unless the learning rate is too high. This is likely the case for the examples given in Figure \ref{fig.batch_size}
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.01net_size32batch8epochs100}.png}
+\caption{}
+\label{fig.br8l}
+\end{subfigure}%
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.01net_size32batch16epochs100}.png}
+\caption{}
+\label{fig.br16}
+\end{subfigure}
+\bigskip
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.01net_size32batch32epochs100}.png}
+\caption{}
+\label{fig.br32}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.01net_size32batch64epochs100}.png}
+\caption{}
+\label{fig.br64}
+\end{subfigure}
+\caption[Effect of adjusting the batch size on Loss of network]{All four graphs show how adjusting the batch size rate effects the loss rate of the network after each epoch. (d) The largest batch size shows consistently the lowest loss.}
+\label{fig.batch_size}
+\end{figure}
 \subsection{Learning Rate and Optimizer}
 The optimiser works to adjust the weights of the model before another training run is performed in order to decrease the loss of the network after each run. 
-The standard optimiser for CNNs is Stochastic Gradient Descent, for this project a slight variation on this has been used, which is the ADAM optimiser. This works in a similar way but has some clever inbuilt variables that prevent the optimiser becoming stuck and the loss rate converging.
+The standard optimiser for CNNs is Stochastic Gradient Descent, for this project a slight variation on this has been used, which is the ADAM optimiser. This works in a similar way but has some clever inbuilt variables that prevent the optimiser becoming stuck and the loss rate converging. 
 \begin{figure}[H]
 \centering
 \begin{subfigure}{0.45\textwidth}
@@ -299,7 +325,7 @@ The standard optimiser for CNNs is Stochastic Gradient Descent, for this project
 \caption{}
 \label{fig.lr0.0001}
 \end{subfigure}
-\caption[Effect of adjusting learning rate on Loss of network]{All four graphs show how adjusting the learning rate of the optimiser effects the loss rate of the network after each epoch. Clearly shows how a smaller learning rate leads to smaller adjustments between each epoch.}
+\caption[Effect of adjusting learning rate on Loss of network]{All four graphs show how adjusting the learning rate of the optimiser effects the loss rate of the network after each epoch. (b) returns the lowest loss, however there is a lot of fluctuation to the returned loss..}
 \label{fig.learning_rate}
 \end{figure}
 

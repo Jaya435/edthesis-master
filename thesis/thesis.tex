@@ -3,13 +3,8 @@
 
 %========================= PREFACE ========================= 
 \ifthenelse{\boolean{edthesis}}
- {
-   \begin{prefacepart}
-   
-}
-{
-  \frontmatter
-}
+{\begin{prefacepart}}
+{\frontmatter}
 \pagenumbering{gobble} 
 \input{\dir/title}
 \pagenumbering{roman} 
@@ -18,9 +13,8 @@
 {\setlength{\parskip}{0ex plus 0.5ex minus 0.2ex}}
 
 \ifthenelse{\boolean{edthesis}}
- {
-   \end{prefacepart}
-}
+{\end{prefacepart}}
+
 
 
 
@@ -32,6 +26,7 @@
 \markboth{\MakeUppercase{Abstract}}{\MakeUppercase{Abstract}}
 \input{\dir/abstract1.tex}
 \mainmatter
+\setcounter{chapter}{0}
 %========================= CHAPTERS ========================= 
 \renewcommand{\dir}{../Part1/chapter1/chapter/}
 \input{\dir/chapter1.tex}
@@ -45,35 +40,33 @@
 \input{\dir/chapter5.tex}
 %========================= BIBLIOGRAPHY ========================= 
 \ifthenelse{\boolean{edthesis}}
- {
- \begin{singlespace}
+{
+\begin{singlespace}
 }
 {
   \backmatter
 }
-%\bibliographystyle{unsrt}
+
 \printbibliography[
 heading=bibintoc,
 title={References}
 ]
-%\addcontentsline{toc}{chapter}{References}
-%\bibliography{ism}
-\ifthenelse{\boolean{edthesis}}
- {
-  \end{singlespace}
- }{}
-{
-   \begin{prefacepart}
-    }
 
+\ifthenelse{\boolean{edthesis}}
 {
+  \end{singlespace}
+}{}
+{\begin{prefacepart}}
+% {
+% \end{prefacepart}
+% {
 
   \frontmatter
   \pagenumbering{gobble}
   \part{Technical Report}
 
   \pagenumbering{roman} 
-}
+%}
 \ifthenelse{\boolean{edthesis}}
 
  {
@@ -106,7 +99,7 @@ title={References}
 \mainmatter
 
 
-\setcounter{chapter}{0}
+%S\setcounter{chapter}{0}
 %========================= CHAPTERS ========================= 
 \renewcommand{\dir}{../Part2/chapter1/chapter/}
 \input{\dir/chapter1.tex}
