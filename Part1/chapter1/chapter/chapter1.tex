@@ -43,7 +43,7 @@ CNNs have been inspired by the biological process as the network patterns resemb
  \par
  CNNs are a form of neural network that were specifically designed to work well for inputs with multiple channels, i.e. images. They are made up of multiple neurons with learnable weights and bisases, just like RFs and SVMs. Each neuron receives an input, performs a dot product, and then optionally follows with a non-linear function. CNNs are a distinct class of neural networks because they explicitly assume that the inputs are images allowing for certain properties to be encoded. Regular neural networks, using RFs and SVMs, do not scale well to images with multiple channels of information. For remote sensing classification problems the imagery will have at least three channels of information, if not more. For a regular neural network a 256x256 image with three channels equates to 196,000 weights to calculate per neuron, requiring a lot of parameters and can lead to overfitting. CNNs take advantage of th 3D volume of neurons so that each of the neurons has a height, width and depth component where the depth corresponds to the number of channels in the input image. The networks then proceeds to convolve the input data into a single vector class score arrange along the depth dimension. 
 
-\section*{Related Work}
+\section{Related Work}
 There are many studies that use CNNs to classify images etc
 \subsection*{Available Packages}
 The two most popular libraries being used by researchers and professionals are Tensorflow and Pytorch. Tensorflow is based on Theano and developed b Google whereas Pytorch is based on Torch and developed by Facebook.
