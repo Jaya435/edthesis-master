@@ -25,8 +25,12 @@
     \end{tabular}}
   }
 \maketitle
-\tableofcontents
+\setcounter{tocdepth}{4}
+\begin{refsection}
 \input{\dir/chapter1.tex}
+
+\printbibliography[heading=bibintoc,title={References}]
+\end{refsection}
 %\clearpage
 %\listoffigures
 %\listoftables
