@@ -1,7 +1,7 @@
 \chapter{Methodology}
 
 \section{Data Selection}
-The first point for considering what dataset to use for this project was to identify a product that was open-source, and with a resolution less than one metre. It had to comprise of an RGB image with an associated mask layer representing the feature or features of interest. In \cite{Richmond19b} Table \ref{tab.datasets}, displays all the datasets considered can be found with justifications for each. For this thesis the INRIA Building Dataset was used, this dataset was developed for the project outlined in \cite{maggiori17a}. Their dataset was created in order to ensure it contained recent orthorectified imagery; recent official cadastral records; precise registration between orthorectified imagery and cadastral records; open access data, for both imagery and cadaster; and coverage that varied across urban landscapes and illumination. \cite{maggiori17a} found that there were certain areas in Austria and the US that satisfied these requirements and they focused on zones where reference data and images were available. The US imagery was provided at either 15 or 30cm resolutions with three to four spectral bands and the Austrian data contains three bands ar a resolution of 10 or 20 cm. They built the dataset to be consistent at 30 cm and RGB by using average re-sampling where needed. For there feature mask they considered two classes, \textit{building} and \textit{not building}. Once this was done they visually inspected the imagery to ensure the cadaster datasets were properly aligned with the imagery, removing cities where irregular shifts had occurred. 
+The first point for considering what dataset to use for this project was to identify a product that was open-source, and with a resolution less than one metre. It had to comprise of an RGB image with an associated mask layer representing the feature or features of interest. In \cite{Richmond19b}, Table \ref{tab.datasets} displays all the datasets considered can be found with justifications for each. For this thesis the INRIA Building Dataset was used, this dataset was developed for the project outlined in \cite{maggiori17a}. Their dataset was created in order to ensure it contained recent orthorectified imagery; recent official cadastral records; precise registration between orthorectified imagery and cadastral records; open access data, for both imagery and cadaster; and coverage that varied across urban landscapes and illumination. \cite{maggiori17a} found that there were certain areas in Austria and the US that satisfied these requirements and they focused on zones where reference data and images were available. The US imagery was provided at either 15 or 30cm resolutions with three to four spectral bands and the Austrian data contains three bands ar a resolution of 10 or 20 cm. They built the dataset to be consistent at 30 cm and RGB by using average re-sampling where needed. For there feature mask they considered two classes, \textit{building} and \textit{not building}. Once this was done they visually inspected the imagery to ensure the cadaster datasets were properly aligned with the imagery, removing cities where irregular shifts had occurred. 
 
 \begin{table}[htbp]
 \centering
@@ -29,11 +29,57 @@ Table \ref{tab.inria_dataset} depicts the regions the regions included in the da
     \label{fig.inria_dataset}
 \end{figure}
 
-
-
-\section{Model Architecture}
+\section{Model Architecture}\label{sec.model_architecture}
 This section will discuss the architecture of the CNN and justify why certain elements were chosen over others, for a more detailed discussion of how CNNs work please refer to \cite{Richmond19b}.
-\section{Performance}
+\par
+As the aim of this project is to generate a framework that can be reusable by other researchers, the network has been generalised to work with any RGB image that has an associated binary mask. CNNs are made up of a series of convolutional (Conv) layers that work sequentially to transform the dimensions of the data. These Conv layers are the building blocks of the network and the designer of the network can adjust the number of Conv layers to transform the data more or less before a prediction is made on the class of the pixel. Each Conv layer accepts a volume of size\textbf{ $W_1\times H_1\times D_1$} and there are a series of hyperparameters that can be adjusted: the number of filters \textbf{K}, the spatial extent \textbf{F}, the stride \textbf{S}, and the amount of zero padding \textbf{P}. These transform the input volume so that \textbf{$W_2\times H_2\times D_2$} becomes: 
+\[\textbf{$W_2 = (W_1 - F + 2P)/S + 1$}\] \[\textbf{$H_2 = (H_1 - F + 2P)/S + 1$}\]\[\textbf{ $D_2 = K$}\]
+The typical hyperparameters for a CNN are $F = 3$, $S = 1$, $P = 1$, however there are common conventions that motivate these hyperparameters. As remote sensing typically works with at least three channels in the input volume the generalised architecture structure here differs from common convention, the main difference being there are no Pool layers (this is discussed in more detail in \citet{Richmond19b}). This means a different set of hyperparameters were chosen for this specific project, $F = 4$, $S = 2$, $P = 1$. 
+\par
+Along with convolving the data in each block, the data goes through batch normalisation and an activation function. \citet{ioffe15} were the first to recognize the effect of internal covariate shift in deep learning problems. The effect of internal covariate shift is not significant within a single training set. But, if the trained network were to be applied to another region, the effect can result in an inaccurate model. In the CNN presented here, a batch normalisation function is applied to the batch and is separated from the optimiser and the gradient descent, this allows for higher learning rates in the network (Figure \ref{fig.batchnorm}). By normalising activations throughout the network, small changes to the parameters are prevented from amplifying into sub optimal changes in the activation gradients (\cite{ioffe15}). 
 
-\section{Hyperparameter Tuning}
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.75\textwidth]{\dir/figs/batchnorm.PNG}
+    \caption[Example of the effect of Batch Normalisation]{Example of the effect of Batch Normalisation; (a) shows the test accuracy with and without Batch Normalisation plotted against the number of training steps. (b,c) Batch Normalisation makes the distribution more stable and reduced the covariate shift. Taken from \citet{ioffe15}.}
+    \label{fig.batchnorm}
+\end{figure}
+
+Following normalisation, an activation function is applied to the input volume. The activation function introduces non-linearity to the network and converts the input signal to an output one for the next block in the architecture. Without an activation function the network would be a linear function and be limited in complexity and function. A CNN without an activation function is simply a linear regression model. Their are several different activation functions, all for different applications. The function used in this architecture is the Rectified Linear Unit (ReLU), which is the most reliable ans can be used as a good approximation for all applications (\cite{krizhevsky17}). ReLu corrects a value to be 0 when $<$ 0 and then linear with a slope of 1 when x $>$ 0 (Figure \ref{fig.reluA}). 
+\par
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Part2/chapter3/chapter/figs/relu.jpeg}
+    \caption{ReLu function.}
+    \label{fig.reluA}
+\end{figure}
+
+A CNN is split up into two sections, the encoder and the decoder. The encoder abstracts the data, makes a prediction about the pixel class and then the decoder returns this prediction into a meaningful value that can be analysed. The two parts of a CNN can be seen in Figure \ref{fig.unet_large}, on the left there is the encoder and on the right is the decoder. On either side of the figure each Conv block transforms the dimensions of the input volume, either to convolve or deconvolve. For our architecture the output volume has two channels, if we were looking at multiple classifications this would increase relative to the number of classes. In our case we are only interested in \textit{building} and \textit{non-building}. 
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=1\textwidth]{\dir/figs/unet_large.pdf}
+    \caption[Schematic representation of the U-Net part of the network]{Schematic representation of the U-Net part of the network. Model ingests a three channel RGB image and output a two channel binary classification.}
+    \label{fig.unet_large}
+\end{figure}
+\section{Model Training}
+To begin training the model, the training dataset must first be split into training, validation and testing. This is done by an 80:10:10 split of all the data in the train set. During model training, the CNN will not touch the test set, this is in order to test the overall accuracy of the network. A successful model is one that achieves a high accuracy in a relatively short amount of time. The training can be monitored by inspecting the loss rate as the training progresses.The data loss measures the compatibility between a prediction and the ground truth label. It is necessary to plot both the training loss and the validation loss as training progresses. Typically validation loss should be similar to but slightly higher than the training loss once the training is concluded. As long as the validation loss is lower than or even quality to the training loss one should continue training the network. If the training loss reduced without an increase in validation loss, training continues. Once validation loss starts to increase, then the training should stop and the networks accuracy evaluated. If the accuracy is not acceptable, then the models parameters should be adjusted. 
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.5\textwidth]{\dir/figs/accuracies.png}
+    \caption[Example loss rates during training]{Example loss rates during training, the gap between the training and validation accuracy indicates the amount of overfitting.}
+    \label{fig.accuracies}
+\end{figure}
+\subsection{Adjusting model parameters}
+To test which combination of hyperparameters produces the best loss rate, many training runs need to be implemented to test all possible combinations. For the model presented here, the learning rate, batch size and the number of filters in the Conv layer were iterated over to see which produced the best loss rate and model accuracy over 100 training runs. The loss rate should be as close to the best case example in Figure \ref{fig.accuracies}, the combinations that produces the best loss rate will then be used to train the network over an increased number of epochs. 
+\subsubsection{Number of filters in Conv}
+As mentioned in Section \ref{sec.model_architecture} the number of filters in the Conv layer controls the depth to which the input is transformed as it is output to the next layer. The number of filters determines the number of feature maps that are produced during each convolution to represent the features in the image that is being analysed. 
+
+\subsubsection{Optimiser and Learning Rate}
+
+\subsubsection{Batch Size}
+Fluctuations in the loss rate are caused by the batch size. When the batch size is 1 the fluctuations will be relatively high When the batch size is the full dataset the fluctuations will be at their minimum because every gradient update should improve the loss function unless the gradient is too high. 
+
+\section{Performance}
 
