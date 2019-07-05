@@ -1,7 +1,12 @@
 \chapter{Data Processing and and Loading}
 This chapter will discuss how to prepare the users training data to be in the correct format to feed into the convolutional neural network. PyTorch allows for the data to be fed in a variety of different ways. Their CNN tutorial online uses small images that are labelled using a csv to flag where certain features in the training images are. Our network differs from this and assumes the user has two folders, one with RGB rasters and another with matching ground truth images that are rasters with max and min values corresponding to where the items of interest are in the similarly named RGB raster. 
 
-\par
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{\dir/figs/example_data.png}
+    \caption[Side by Side comparison of RGB image and ground truth]{The grid on the left shows the original binary classification, where white shows the class of interest and the black shows nothing. On the right, the upper grid shows white where the original image showed white. On the right the lower grid shows white where the original grid showed black.}
+    \label{fig.example_data}
+\end{figure}
 
 
 \section{Pre-Processing the Data}
