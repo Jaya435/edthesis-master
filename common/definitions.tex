@@ -95,7 +95,7 @@
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
-    basicstyle=\footnotesize,
+    basicstyle=\scriptsize,%\footnotesize,
     breakatwhitespace=false,         
     breaklines=true,                 
     captionpos=b,                    
@@ -104,7 +104,17 @@
     numbersep=5pt,                  
     showspaces=false,                
     showstringspaces=false,
-    showtabs=false,                  
-    tabsize=2
+    showtabs=true,                  
+    tabsize=4
 }
 \lstset{style=mystyle}
+
+\defbibenvironment{bibliography}
+  {\enumerate
+     {}
+     {\setlength{\leftmargin}{\bibhang}%
+      \setlength{\itemindent}{-\leftmargin}%
+      \setlength{\itemsep}{\bibitemsep}%
+      \setlength{\parsep}{\bibparsep}}}
+  {\endenumerate}
+  {\item}

@@ -4,11 +4,12 @@
 
 \setlength{\textheight}{24cm}
 \setlength{\headsep}{0cm}
+\addbibresource{myrefs.bib}
 
 \newcommand{\dir}{chapter}
 
 \begin{document}
-\title{Chapter 2}
+\title{Chapter 2 - Methodology}
 \author{Thomas Richmond}
 \date{
   \today\\
@@ -24,9 +25,14 @@
   }
 \maketitle
 \tableofcontents
+\listoffigures
+\begin{refsection}
 \input{\dir/chapter2.tex}
+
+\printbibliography[heading=bibintoc,title={References}]
+\end{refsection}
 %\clearpage
-%\listoffigures
+\listoffigures
 %\listoftables
 %\listofalgorithms
 %\newpage
