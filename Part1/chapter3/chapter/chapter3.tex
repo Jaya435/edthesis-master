@@ -15,9 +15,23 @@ A simple grid search was used to iterate over a list of all possible combination
 \end{table}
 \begin{figure}[htpb]
     \centering
-    \includegraphics[width=\textwidth]{\dir/figs/hp_grid.png}
-    \caption[Learning Rate Curves for Various Hyperparameter Combinations]{Learning rate curves for various hyperparameter combinations.}
-    \label{fig.hyperparameters}
+    \includegraphics[width=\textwidth]{\dir/figs/lr_varied.png}
+    \caption[Example of the effect of changing the learning rate]{Example of how learning rate effects the training progression over 100 epochs.}
+    \label{fig.lr_varied}
+\end{figure}
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\textwidth]{\dir/figs/batch_varied.png}
+    \caption[Example of the effect of changing the batch size]{Example of how the batch size effects the training progression over 100 epochs.}
+    \label{fig.batch_varied}
+\end{figure}
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\textwidth]{\dir/figs/net_varied.png}
+    \caption[Example of the effect of changing the number of filters in each Convolution layer]{Example of how changing the number of filters effects the learning rate.}
+    \label{fig.net_varied}
 \end{figure}
 \section{Accuracy}
 Throughout the training process, the network saves the state of the weights and the biases whenever the loss rate reduces. This model state can then be loaded again at a later data and training can continue. The final stage of training, takes the model state that results in the lowest loss and applies it to the test data to make a prediction and evaluate the accuracy.
