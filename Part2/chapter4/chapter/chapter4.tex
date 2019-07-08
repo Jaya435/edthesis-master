@@ -4,18 +4,48 @@ This chapter will discuss how to prepare the users training data to be in the co
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=1\textwidth]{\dir/figs/example_data.png}
-    \caption[Side by Side comparison of RGB image and ground truth]{The grid on the left shows the original binary classification, where white shows the class of interest and the black shows nothing. On the right, the upper grid shows white where the original image showed white. On the right the lower grid shows white where the original grid showed black.}
+    \caption[Side by Side comparison of RGB image and ground truth]{Side by Side comparison of RGB image and ground truth. The plot on the left shows the RGB image, the image on the right shows the ground truth label.}
     \label{fig.example_data}
 \end{figure}
 
 
 \section{Pre-Processing the Data}
-In order for the image data to work within PyTorch it needs to be in the Python Imaging Library Format (PIL) format. The training and test dataset used for the creating of the workflow were in .tif format and so no conversion was needed. If the data type the user intended to use was not in the PIL format, a conversion would be necessary.
+In order for the image data to work within PyTorch it needs to be in the Python Imaging Library Format (PIL) format. The training and test dataset used for the creating of the workflow were in .tif format and so no conversion was needed as the PIL can read this data type. If the data type the user intended to use was not in the PIL format, a conversion would be necessary.
 \par
-The training data first needs to be split into training, validation and testing datasets. During training the model will not touch the test dataset, this is in order to test the overall accuracy of the network. I wrote a custom script in order to do this, that uses PyTorch's subset sampler function.
-\section{Transform the Data}
+The training data first needs to be split into training, validation and testing datasets. During training the model will not touch the test dataset, this is in order to test the overall accuracy of the network. I wrote a custom script in order to do this, that uses PyTorch's subset sampler function. The script calls the BuildingDataset class outlined in section \ref{sec.transform}, then proceeds to split the indices of the dataset based on its length: 80:10:10 for train, valid and test. The indices are then used by the PyTorch DataLoader class to only select specific files from within the building dataset. For example the train\_loader at  Listing \ref{lst.split} line 21, is only made up of the data selected by the train\_sampler indices array. 
+
+\begin{lstlisting}[language=Python, caption = {Function to split the training data into train, valid and test PyTorch dataloaders that can in turn be used to train and evaluate the network.}, label={lst.split},float,floatplacement=htbp]
+def train_valid_test_split(image_paths, target_paths, batch_size):
+    dataset = BuildingsDataset(image_paths, target_paths)
+    validation_split = .2
+    test_split = .1
+    shuffle_dataset = True
+    random_seed = 42
+    dataset_size = len(dataset)
+    indices = list(range(dataset_size))
+    valid_split = int(np.floor(validation_split * dataset_size))
+    test_split = int(np.floor(test_split * dataset_size))
+    if shuffle_dataset :
+        np.random.seed(random_seed)
+        np.random.shuffle(indices)
+    train_indices, val_indices, test_indices = indices[valid_split:], indices[test_split:valid_split], indices[:test_split]
+
+    # Creating PT data samplers and loaders:
+    train_sampler = SubsetRandomSampler(train_indices)
+    valid_sampler = SubsetRandomSampler(val_indices)
+    test_sampler = SubsetRandomSampler(val_indices)
+
+    train_loader = DataLoader(dataset,batch_size,num_workers=0,sampler=train_sampler)
+
+    valid_loader = DataLoader(dataset,batch_size,num_workers=0,sampler=valid_sampler)
+
+    test_loader = DataLoader(dataset, batch_size, num_workers=0, sampler=test_sampler)
+    return (train_loader, valid_loader, test_loader)
+
+\end{lstlisting}
+\section{Transform the Data}\label{sec.transform}
 For a user wanting to load and train a network they first need to prepare their data so that it is in the right format to be read by the network. In remote sensing, a user may commonly have an image of 30,000x30,000 pixels if they have a 10x10km tile at ~30cm resolution. This needs to be transformed and reduced in size to train a network. The networks would not be trained well if just one image was fed in, especially at the extreme size of 30,000x30,000 pixels. The first step of the process is to transform and crop this data so that only a small section of the image is being fed into the network. I have created a class for clipping and tiling the images that then can be fed into the CNN (Listing \ref{lst.transform}).
-Transforms on the data need to be performed on both the image layer and the binary mask in tandem. It is necessary to perform the transform in order to reduce the spatial dimensions of the input volume and synthesis more training samples. By taking a 128x128 pixel random crop, from each 5000x5000 pixel training sample, each iteration, the number of training samples will increase. A custom transform class script was written to ensure that these transformed were mirrored and the two layers of information remained paired and not distorted (Listing \ref{lst.transform}). If the transformation is not performed in tandem then when the network compares the predicted output to the ground truth output, the two images will not aligned.
+Transforms on the data need to be performed on both the image layer and the binary mask in tandem. It is necessary to perform the transform in order to reduce the spatial dimensions of the input volume and synthesise more training samples. By taking a 128x128 pixel random crop, from each 5000x5000 pixel training sample, each iteration, the number of training samples will increase. A custom transform class script was written to ensure that these transformed were mirrored and the two layers of information remained paired and not distorted (Listing \ref{lst.transform}). If the transformation is not performed in tandem then when the network compares the predicted output to the ground truth output, the two images will not aligned.
 The arguments for the transform class are lists of all the users image and associated and binary mask files. The user can remove the comment at Listing \ref{lst.transform} line 16-19 if their training data is not all of the same dimensions. The class then proceeds to crop, horizontally flip, vertically flip, and eventually transform the data arrays into PyTorch tensors that can be fed into PyTorch's neural network data loader class. 
 \par 
  \begin{lstlisting}[language=Python, caption = {Transform Class for buidling the dataset class, which can be input into the dataloader class, which in turn is iterated over in the CNN.}, label={lst.transform},float,floatplacement=htbp]
