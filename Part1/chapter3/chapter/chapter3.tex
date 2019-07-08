@@ -13,7 +13,12 @@ A simple grid search was used to iterate over a list of all possible combination
 \caption[Hyperparameter possibilities]{Depicts all the possibilities considered for the hyperparameters chosen in this study.}
 \label{tab.grid_search}
 \end{table}
-
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\textwidth]{\dir/figs/hp_grid.png}
+    \caption[Learning Rate Curves for Various Hyperparamater Combinations]{Learning rate curves for various hyperparamater combinations.}
+    \label{fig.hyperparameters}
+\end{figure}
 \section{Accuracy}
 Throughout the training process, the network saves the state of the weights and the biases whenever the loss rate reduces. This model state can then be loaded again at a later data and training can continue. The final stage of training, takes the model state that results in the lowest loss and applies it to the test data to make a prediction and evaluate the accuracy.
 \section{Predictions}
