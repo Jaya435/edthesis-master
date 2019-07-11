@@ -65,7 +65,7 @@ A CNN is split up into two sections, the encoder and the decoder. The encoder ab
 \end{figure}
 
 
-\section{Model Training}
+\section{Model Training}\label{sec.model_training}
 To begin training the model, the training dataset must first be split into training, validation and testing. This is done by an 80:10:10 split of all the data in the train set. During model training, the CNN will not touch the test set, this is in order to test the overall accuracy of the network. A successful model is one that achieves a high accuracy in a relatively short amount of time. The training can be monitored by inspecting the loss rate as the training progresses.The data loss measures the compatibility between a prediction and the ground truth label. It is necessary to plot both the training loss and the validation loss as training progresses. Typically validation loss should be similar to but slightly higher than the training loss once the training is concluded. As long as the validation loss is lower than or even quality to the training loss one should continue training the network. If the training loss reduced without an increase in validation loss, training continues. Once validation loss starts to increase, then the training should stop and the networks accuracy evaluated. If the accuracy is not acceptable, then the models parameters should be adjusted. 
 \begin{figure}[htpb]
     \centering
@@ -89,7 +89,7 @@ The optimiser used for this study is the \textit{Adam} optimiser. It was created
     \caption[Comparison of different optimisers]{Comparison of different optimisers, the lines depict how the cost of the various algorithms on the training. Taken from \citet{kingma14}}.
     \label{fig.adam}
 \end{figure}
-\subsubsection{Batch Size}
+\subsubsection{Batch Size}\label{sec.batch_size}
 The batch size determines the number of training samples that are utilised in one iteration (\cite{mnih13}). Stochastic Gradient Descents (SGDs) are employed in small batch regimes where batch size is typically less than the number of training samples. SGDs are limited for parallelisation due to the sequential natures of iterations, speed-ups are limited by the small batch size (\cite{simonyan14,,mnih13}). However, researchers have observed that this can lead to a loss in generalisation performance (\cite{Keskar16}), which is where the network is intended to perform best. 
 \par
 Fluctuations in the loss rate are caused by the batch size. When the batch size is 2 (Figure \ref{fig.min_batch}) the fluctuations will be relatively high. When the batch size is the full dataset (Figure \ref{fig.max_batch}), the fluctuations will be at their minimum because every gradient update should improve the loss function unless the gradient is too high (\cite{Karpathy3}). 
