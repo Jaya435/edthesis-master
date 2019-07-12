@@ -126,4 +126,9 @@ The most accurate model is the model that will be used to make predictions on th
 \section{Predictions}
 In order to see how well the model has predicted where building are or aren't, the weights and biases of the network are fixed and all the images are sequentially passes through the network and a prediction made on a pixel by pixel basis. 
 
-
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[height=\dimexpr \textheight - 4\baselineskip\relax]{\dir/figs/Predicted_Grid.png}
+    \caption[Image Prediction using the model with the best accuracy]{Image prediction using the model trained with the hyperparameters that produce the best accuracy.}
+    \label{fig.prediction}
+\end{figure}
