@@ -13,18 +13,19 @@ A simple grid search was used to iterate over a list of all possible combination
 \caption[Hyperparameter possibilities]{Depicts all the possibilities considered for the hyperparameters chosen in this study.}
 \label{tab.grid_search}
 \end{table}
-The following sections will show the effect of changing one of the hyperparameters while fixing the other two. The key three key characteristics to observe as mentioned in Section \ref{sec.model_training} are:
+The following sections will show the effect of changing one of the hyperparameters while fixing the other two. The key four characteristics to observe as mentioned in Section \ref{sec.model_training} are:
 \begin{enumerate}
-    \item Validation loss should be slightly higher than training loss once training is complete. Training should continue while validation loss is lower than the training loss.
-    \item If training loss reduces without an increase in validation loss, training should continue
-    \item Once validation loss starts to increase, training should discontinue. 
+    \item Loss should be decreasing, rapidly at first and then slowing down as training progresses. Once the decrease in loss stagnates, training should stop.
+    \item Validation accuracy should be slightly higher than training accuracy once training is complete. Training should continue while validation loss is lower than the training accuracy.
+    \item If training accuracy reduces without an increase in validation accuracy, training should continue
+    \item Once validation accuracy starts to increase, training should discontinue. 
 \end{enumerate}
 \subsection{Adjusting the Learning Rate}
 Adjusting the learning rate adjusts the length the weight vector is travelled on before the loss is calculated again for the next iteration. A smaller learning rate means a smaller adjustment to the weights between iterations. In Figure \ref{fig.lr_varied} the loss rate that shows the most optimal rate of decay is a learning rate of 0.001. After each iteration, the training loss has decrease and the validation loss has remained lower. In contrast, the loss rate for a learning rate of 0.0001 shows a lot of fluctuation in the validation loss and is not displaying a fast decay in of the loss rate. Additionally, the loss rate of 0.1 does not show much variation in the training loss, so would not be considered when continuing training. The learning rate of 0.01, while there is a great deal of fluctuation, the loss is gradually decaying over time. 
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{\dir/figs/lr_varied.png}
-    \caption[Example of the affect of changing the learning rate]{Example of how the learning rate affects the training progression over 100 epochs.}
+    \caption[Example of the affect of changing the learning rate]{Example of how the learning rate affects the training progression over 100 epochs. The accuracy values have been smoothed using a moving window of 5, the smoothed training loss uses a moving window of 10.}
     \label{fig.lr_varied}
 \end{figure}
 \subsection{Adjusting the Batch Size}
