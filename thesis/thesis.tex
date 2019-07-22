@@ -72,7 +72,7 @@ title={References}
  {
   \begin{singlespace}
  }
-
+\setcounter{tocdepth}{1}
 \tableofcontents
 \listoftables
 \listoffigures
@@ -113,6 +113,8 @@ title={References}
 \input{\dir/chapter5.tex}
 \renewcommand{\dir}{../Part2/chapter6/chapter/}
 \input{\dir/chapter6.tex}
+\renewcommand{\dir}{../Part2/chapter7/chapter/}
+\input{\dir/chapter7.tex}
 
 %========================= BIBLIOGRAPHY ========================= 
 \ifthenelse{\boolean{edthesis}}
@@ -142,11 +144,11 @@ title={References}
 %========================= Appendix ========================= 
 
 
-\renewcommand{\dir}{../appendix/chapter}
+\renewcommand{\dir}{../appendices/chapter}
 \appendix
 \renewcommand\thesection{\Alph{section}}
 \addcontentsline{toc}{chapter}{Appendices}
 \chapter*{Appendices}
 \input{\dir/appendix1.tex}
-\section{CNNs}
+\input{\dir/appendix2.tex}
 

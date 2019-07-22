@@ -1,2 +1,202 @@
-\chapter{Future Work}
-This is a template chapter. Lots of exciting stuff should go in here.
+\chapter{Implementing the CNN}
+This chapter contains a step-by-step guide of how to successfully implement the convolutional neural network described in the previous chapters. The CNN was built with Torch version 0.4.1 and Cuda version 8.0 using Anaconda 5.0.1. All the code used here can be found in this github repository \url{https://github.com/s1217815-ed-19/cnn_inria.git}. 
+\par
+The technical report has been written with the assumption that the user will have access to the same resources. The GPUs used here are:
+\begin{enumerate}
+    \item NVIDIA Tesla K80 - \url{https://www.nvidia.com/en-gb/data-center/tesla-k80/}
+    \item NVIDIA TITAN X (Pascal architecture) - \url{https://www.nvidia.com/en-us/geforce/products/10series/titan-x-pascal/}
+\end{enumerate}
+\par
+This chapter will also include sections on how to submit the jobs to a Sun God Engine (SGE) server using bash scripts, specifically using array jobs to optimise compute time. The user may not have access to the same hardware, but the sections will still be included as examples.
+\section{Requirements}
+The version of PyTorch that the CNN developed here was written for, requires Anaconda 5.0.1.
+\subsubsection{Anaconda}
+Instructions for installing anaconda can be found on their website \url{https://docs.anaconda.com/anaconda/install/}.
+\par
+To install the older version, visit this web page \url{https://repo.continuum.io/archive/} to download the correct file for your system.
+\subsubsection{Create Virtual Environment}
+Next stage is to use anaconda to create a virtual environment containing the packages required to implement the code. This is done with:\medskip \\* \texttt{conda create -n mypytorch python=3.6 anaconda}. \medskip \\* 
+The environment is created with Python 3.6 as this is the requirement for the version of PyTorch used here.
+
+
+\subsubsection{Required Packages}
+The hardware defined aboved at the \citet{ecdf19}, needs a CUDA toolkit of 8.0.61 and PyTorch version of 0.4.1. This is installed with: \medskip \\* \texttt{conda install  pytorch=0.4.1 torchvision cudatoolkit=8.0 -c pytorch }  \medskip \\*
+This ensures that the correct versions of torchvision and the CUDA toolkit are installed alongside PyTorch version 0.4.1. 
+
+\paragraph{}
+Once these are installed successfully the user should be able to implement the CNN. 
+
+\section{Implementing the Code}
+All the code can be found at \url{https://github.com/s1217815-ed-19/cnn_inria.git}. The data can either be cloned or downloaded onto the user's locally system. All the code will also be included in Appendix \ref{app.model_train}.
+\subsection*{Data Pre-Processing}
+This project will not discuss how to prepare and pre-process satellite imagery. However, the next section will outline the physical structure required for the training dataset.
+The user should have their training data organised within one train directory. 
+\dirtree{%
+.1 train.
+.2 gt.
+.3 example1.tif.
+.3 example2.tif.
+.2 images.
+.3 example1.tif.
+.3 example2.tif.
+}
+The files contained within \textit{images} and \textit{gt} should have the same names and be mirror images of each other. 
+\par
+The user should inspect their training data and determine whether or not every image is of the same size, if not they will need to make a minor adjustment to the code to ensure that all data being sampled is of the same resolution and spatial dimension.
+\subsection*{Part 1 - Define the hyperparameters}
+The user first needs to defined the hyperparameters over which the algorithm will iterate to find the optimal solution. For this project, this was done with a simple grid search. The user need to manually define their hyperparameters using the \texttt{grid\_search.py} script (Appendix \ref{app.grid_seacrh}). This outputs a text file that is used when submitting jobs to the SGE server. 
+\subsection*{Part 2 - Train the Model}
+There are two ways the user can train their model. If they have access to an SGE server then they can submit their job using a bash script and define the hardware they would like to run the model on. If they do not have access to this, then they can simply run the model using a bash script without the defined hardware. The complete code to train the CNN can be found in Appendix \ref{app.train_cnn}, and is called \texttt{ConvNet.py}
+\begin{lstlisting}[language=bash, caption = {Bash script to run the python file \texttt{ConvNet.py}. This will run the file locally on the User's own machine.}, label={lst.bash}]
+#!/bin/sh
+source activate mypytorch
+
+input='grid_search_96.txt'
+readarray myArray < "$input"
+for ID in seq 96; 
+do
+    set -- ${myArray[$ID]}
+    # submits batch job
+    python ../python/ConvNet.py --path <path/to/your/train/dir/> --arch_size "$1" --lr "$2" --batch_size "$3" --model_dict <path/to/where/you/want/to/save/modelstate.pt>
+done;
+\end{lstlisting}
+This bash script contains a for loop, iterating over number from 0-96. The user needs to adjust this number depending on the length of the list produced in the previous section. In the example given, the user produces a list that has 96 unique combinations. 
+\par
+Below is the help documentation associated with the \texttt{ConvNet.py} file. The user should define the path to the train directory and where the directory they would like the best model from each iteration to be saved. The user can also defined how many epochs to train the model for. The bash script will iterate over all of the combinations in their grid\_search.txt file and output the results as a csv file for each hyperparameter combination. The results contain the validation loss, validation accuracy, training loss, and training accuracy for analysis after the model run is complete. 
+\begin{lstlisting}[language=bash, caption = {Help file associated with the script \texttt{ConvNet.py} Describes the various user defined arguments to run the script from the command line.}, label={lst.ConvNet_help}]
+usage: ConvNet.py [-h] [--path PATH] [--batch_size BATCH_SIZE] [--lr LR]
+                  [--num_epochs NUM_EPOCHS] [--arch_size ARCH_SIZE]
+                  [--model_dict MODEL_DICT]
+
+Main script to implement the CNN
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --path PATH           path to train directory
+  --batch_size BATCH_SIZE
+                        select batch size
+  --lr LR               learning rate for optimizer
+  --num_epochs NUM_EPOCHS
+                        Number of epochs
+  --arch_size ARCH_SIZE
+                        inital depth of convolution
+  --model_dict MODEL_DICT
+                        Path to where model is saved, extension should be .pt
+\end{lstlisting}
+If the user does have access to an SGE server and can run the model on GPUs, then they should adjust the previous bash script so that it reads as this:
+\begin{lstlisting}[language=bash, caption = {Bash script to submit the \texttt{ConvNet.py} script to an SGE server, iterating over a list containing a specific number of values}, label={lst.bash_SGE}]
+#!/bin/sh
+
+# Grid Engine options
+#
+#$ -N train_titan
+#$ -cwd
+# -pe gpu 4 
+# -l h_vmem=16G
+#$ -pe gpu-titanx 2
+#$ -l h_vmem=25G
+#$ -l h_rt=03:00:00
+
+# Initialise the modules framework
+. /etc/profile.d/modules.sh
+
+# Check amount of memory (in kbytes) as seen by the job
+ulimit -v
+
+# User specified commands go below here
+module load anaconda/5.0.1
+source activate mypytorch2
+
+
+# Read a text file, containing a list of possible combinations#
+input='grid_search_96.txt'
+readarray myArray < "$input"
+set -- ${myArray[$SGE_TASK_ID]}
+# submits batch job to SGE engine
+echo arch _size is "$1"
+
+python ${HOME}/python/ConvNet.py --arch_size "$1" --lr "$2" --batch_size "$3" 
+
+\end{lstlisting}
+The bash script has been configured so as to run on 2 TITAN X GPUs, requesting a virtual memory of 25GB on each, this additionally includes a matching CPU memory of 25GB for each GPU node. The user could comment out lines 9 and 10, and use lines 7 and 8 instead to run on 4 Tesla K80 GPUs instead. This used 4 GPU nodes, with 16GB CPU and 16GB GPU on each
+\par
+Listing \ref{lst.bash_SGE} line 27 is where this bash script differs from \ref{lst.bash} in terms of implementation. The user submits the job with this command: \medskip \\* \texttt{qsub -t 1-98 -tc 20 model\_train.sh}  \medskip \\* where 1-98 is the number of hyperparameter combinations the user would like to iterate over.
+\par
+As mentioned the overall output of the training and validation accuracy and loss will be saved in csv files. The final output of the script will be the accuracy of the network when applied to the test dataset that the model has not yet seen. 
+
+\subsection*{Part 3 - Model Evaluation}
+The next section will outline some of the python scripts that were written in order to visualise the results of the model training and compare them to the ground truth. 
+\par
+The script \texttt{accuracy.py} (Appendix \ref{app.accuracy}) is used to evaluate the accuracy of all of the saved model states. The user needs to define the path to their train directory and the directory where their saved models are.
+This can be submitted as bash script for the SGE engine as shown below
+\begin{lstlisting}[language=bash, caption = {Bash script required to submit the \texttt{accuracy.py} script. }, label={lst.bash_accuracy}]
+#!/bin/sh
+###########################################
+#                                         #
+#     This job loops over saved models    #
+#     and outputs the most accurate       #
+#                                         #
+###########################################
+
+# Grid Engine Options
+#$ -N Accuracy
+#$ -cwd
+#$ -l h_rt=01:00:00
+#$ -pe sharedmem 16
+#$ -l h_vmem=8G
+
+# Initialise the modules framework
+. /etc/profile.d/modules.sh
+
+# Check amount of memory (in kbytes) as seen by the job
+ulimit -v
+
+# User specified commands go below here
+module load anaconda/5.0.1
+source activate mypytorch
+# Run the program
+python ${HOME}/python/accuracy.py -path /path/to/train/directory -model /path/to/saved/models/
+\end{lstlisting}
+\par
+The script \texttt{raster\_predict.py} (Appendix \ref{app.pred_raster}) is used to iterate over all the images in the train directory and while using the best saved model state, output a raster representing a prediction of the original RGB image. The SGE bash script needed to run this is shown below:
+\begin{lstlisting}[language=bash, caption = {Bash script required to submit the \texttt{raster\_predict.py} script}, label={lst.bash_predRaster}]
+#!/bin/sh
+###########################################
+#                                         #
+# This job predicts and plots where the   #
+# buildings are on an RGB image.          #
+#                                         #
+###########################################
+
+# Grid Engine Options
+#$ -N pred_rst
+#$ -cwd
+#$ -l h_rt=06:00:00
+#$ -pe sharedmem 16
+#$ -l h_vmem=8G
+
+# Initialise the modules framework
+. /etc/profile.d/modules.sh
+
+# Check amount of memory (in kbytes) as seen by the job
+ulimit -v
+wdir = 
+# User specified commands go below here
+module load anaconda/5.0.1
+source activate gdal
+# Run the program
+dir='/exports/eddie/scratch/s1217815/AerialImageDataset/train/images'
+find $dir -type f > filename.txt
+input='filename.txt'
+readarray myArray < ${input}
+python ${HOME}/python/raster_predict.py -model /exports/csce/eddie/geos/groups/geos_cnn_imgclass/data/saved_models/model_inria_batch2_lr0.01_arch16_epochs100.pt -inpfile ${myArray[$SGE_TASK_ID-1]}
+\end{lstlisting}
+The user should change the path at listing \ref{lst.bash_predRaster} line 26 to point to the directory containing their RGB images.
+\paragraph{}
+The script \texttt{predict\_compare.py} (Appendix \ref{app.pred_compare}) is used to again loop over all the RGB images in the train directory. This time the script predicts each pixel class and outputs the original RGB image, the original ground truth image, and the predicted image side by side. 
+\par
+The SGE bash script to perform this operation is found below:
+\lstinputlisting[language=bash, caption={Bash script to produce figures comparing original RGB and ground truth images to the best saved models prediction's.}, label={lst.pred_compare}]{\dir/bash_code/Predict-Image.sh}
+Again the user should change the paths in listing \ref{lst.pred_compare} to ensure that all the paths point to the correct directories. 
+\subsection*{Part 4 - Adjust Hyperparameter Domain and Repeat}
+Once the user has evaluated their results, they should either adjust the hyperparameters and continue training, or be pleased with the accuracy of their results and finish training. 

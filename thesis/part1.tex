@@ -1,0 +1,34 @@
+\documentclass[a4paper,english,12pt]{book}
+\input{common/packages.tex}
+
+
+
+\addbibresource{myrefs.bib}
+\input{common/definitions.tex}
+\input{common/packages.tex}
+
+
+\begin{document}
+\frontmatter
+\part{Research Paper}
+\pagenumbering{arabic} 
+%\chapter{Abstract}
+%\markboth{\MakeUppercase{Abstract}}{\MakeUppercase{Abstract}}
+%\input{preface/abstract1.tex}
+\mainmatter
+\setcounter{chapter}{0}
+
+\newcommand{\dir}{Part1/chapter1/chapter/}
+\input{Part1/chapter1/chapter/chapter1.tex}
+\renewcommand{\dir}{Part1/chapter2/chapter/}
+\input{Part1/chapter2/chapter/chapter2.tex}
+\renewcommand{\dir}{Part1/chapter3/chapter/}
+\input{Part1/chapter3/chapter/chapter3.tex}
+\renewcommand{\dir}{Part1/chapter4/chapter/}
+\input{Part1/chapter4/chapter/chapter4.tex}
+\renewcommand{\dir}{Part1/chapter5/chapter/}
+\input{Part1/chapter5/chapter/chapter5.tex}
+%========================= BIBLIOGRAPHY ========================= 
+
+\printbibliography[heading=bibintoc,title={References}]
+\end{document}
