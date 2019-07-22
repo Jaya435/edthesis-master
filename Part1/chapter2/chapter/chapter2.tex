@@ -66,11 +66,13 @@ A CNN is split up into two sections, the encoder and the decoder. The encoder ab
 
 
 \section{Model Training}\label{sec.model_training}
-To begin training the model, the training dataset must first be split into training, validation and testing. This is done by an 60:20:20 split of all the data in the training set. During model training, the CNN will not touch the test set, this is to test the overall accuracy of the network. A successful model is one that achieves high accuracy in a relatively short amount of time. The training can be monitored by inspecting the loss rate as the training progresses. The data loss measures the compatibility between a prediction and the ground truth label. It is necessary to plot both the training loss and the validation loss as training progresses. Typically validation loss should be similar to but slightly higher than the training loss once the training is concluded. As long as the validation loss is lower than or even quality to the training loss one should continue training the network. If the training loss reduced without an increase in validation loss, training continues. Once validation loss starts to increase, then the training should stop and the accuracy of the network evaluated. If the accuracy is not acceptable, then the model's parameters should be adjusted. 
+To begin training the model, the training dataset must first be split into training, validation and testing. This is done by an 60:20:20 split of all the data in the training set. During model training, the CNN will not touch the test set, this is to test the overall accuracy of the network. A successful model is one that achieves high accuracy in a relatively short amount of time. The training can be monitored by inspecting the loss rate as the training progresses. The data loss measures the compatibility between a prediction and the ground truth label. It is necessary to plot both the training loss and the validation loss as training progresses. 
+
+% Typically validation loss should be similar to but slightly higher than the training loss once the training is concluded. As long as the validation loss is lower than or even equal to the training loss one should continue training the network. If the training loss reduced without an increase in validation loss, training continues. Once validation loss starts to increase, then the training should stop and the accuracy of the network evaluated. If the accuracy is not acceptable, then the model's parameters should be adjusted. 
 \begin{figure}[htpb]
     \centering
-    \includegraphics[width=0.5\textwidth]{\dir/figs/accuracies.png}
-    \caption[Example loss rates during training]{Example loss rates during training, the gap between the training and validation accuracy indicates the amount of overfitting.}
+    \includegraphics[width=0.5\textwidth]{\dir/figs/accuracies.jpeb}
+    \caption[Examples of accuracy during training]{Examples of accuracy during training, the gap between the training and validation accuracy indicates the amount of overfitting.}
     \label{fig.accuracies}
 \end{figure}
 \subsection{Adjusting Model Parameters}
