@@ -66,22 +66,48 @@ A CNN is split up into two sections, the encoder and the decoder. The encoder ab
 
 
 \section{Model Training}\label{sec.model_training}
-To begin training the model, the training dataset must first be split into training, validation and testing. This is done by an 60:20:20 split of all the data in the training set. During model training, the CNN will not touch the test set, this is to test the overall accuracy of the network. A successful model is one that achieves high accuracy in a relatively short amount of time. The training can be monitored by inspecting the loss rate as the training progresses. The data loss measures the compatibility between a prediction and the ground truth label. It is necessary to plot both the training loss and the validation loss as training progresses. 
+To begin training the model, the training dataset must first be split into training, validation and testing. This is done by an 60:20:20 split of all the data in the training set. During model training, the CNN will not touch the test set, this is to test the overall accuracy of the network. A successful model is one that achieves high accuracy in a relatively short amount of time. The training can be monitored by inspecting the loss rate as the training progresses. The loss of the network measures the compatibility between the prediction and the ground truth label. It is necessary to plot both the training loss and the validation loss as training progresses.  
 
 % Typically validation loss should be similar to but slightly higher than the training loss once the training is concluded. As long as the validation loss is lower than or even equal to the training loss one should continue training the network. If the training loss reduced without an increase in validation loss, training continues. Once validation loss starts to increase, then the training should stop and the accuracy of the network evaluated. If the accuracy is not acceptable, then the model's parameters should be adjusted. 
-\begin{figure}[htpb]
-    \centering
-    \includegraphics[width=0.5\textwidth]{\dir/figs/accuracies.jpeg}
-    \caption[Examples of accuracy during training]{Examples of accuracy during training, the gap between the training and validation accuracy indicates the amount of overfitting.}
-    \label{fig.accuracies}
-\end{figure}
+
 \subsection{Adjusting Model Parameters}
-To test which combination of hyperparameters produces the best loss rate, many training runs need to be implemented to test all possible combinations. For the model presented here, the learning rate, batch size and the number of filters in the Conv layer were iterated over to see which produced the best loss rate and model accuracy over 100 training runs. The loss rate should be as close to the best case example in Figure \ref{fig.accuracies}, the combinations that produce the best loss rate will then be used to train the network over an increased number of epochs.
+To test which combination of hyperparameters produces the best loss rate, many training runs need to be implemented to test all possible combinations. For the model presented here, the learning rate, batch size and the number of filters in the Conv layer were iterated over to see which produced the best loss rate and model accuracy over 100 training runs. The loss rate should be as close to the best case example in Figure \ref{fig.lr}, the combinations that produce the best loss rate will then be used to train the network over an increased number of epochs.
+
+\begin{figure}[htpb]
+\centering
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{Part1/chapter2/chapter/figs/learningrates.jpeg}
+\caption{}
+\label{fig.lr}
+\end{subfigure}%
+\qquad
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{Part1/chapter2/chapter/figs/accuracies.jpeg}
+\caption{}
+\label{fig.accuracies}
+\end{subfigure}
+\caption[Examples of accuracy and loss rate during training]{(a) The effect of different learning rates on the loss time.  (b) The gap between the training accuracy and the validation accuracy indicates the amount of overfitting. Taken from \citet{Karpathy3}.}
+\label{fig.best_case}
+\end{figure}
 \subsubsection{Number of Filters in the Conv Layers}
 As mentioned in Section \ref{sec.model_architecture} the number of filters in the Conv layer controls the depth to which the input is transformed as it is output to the next layer. The number of filters determines the number of feature maps that are produced during each convolution to represent the features in the image that is being analysed. It also contributes the amount of memory that the training will need and as the initial number of filters increases so does the amount of memory required. Adjusting the initial number of filters is a compromise between efficiency and accuracy. 
 
 \subsubsection{Optimiser and Learning Rate}
-The loss of the network is used to measure the error between the predicted output and the actual output. The network here used a Softmax classifier that uses cross-entropy to determine the loss. More detail on how the Softmax classifier works can be found in \citet{Richmond19b}. Optimisation finds the particular set of weights that work together to minimise the loss function (\cite{Karpathy_opt}). It is possible to calculate the best direction along which the weight vector should be changed to produce the steepest gradient for the loss to reach zero. However, it is not possible to determine the length of the steepest gradient section. Therefore the user needs to determine the step size, or learning rate after each iteration (\cite{Karpathy_opt}). For large scale neural networks this is calculated over the size of the batch rather than the entire training set and is often denoted as the Stochastic Gradient Descent (SGD) (\cite{Bottou98,Sutskever13}.
+The loss of the network is used to measure the error between the predicted output and the actual output. The loss in this study was calculated using a binary cross entropy loss function that was applied to every pixel to output a loss score for both classes. Binary cross entropy loss is calculated as:
+
+\[C = -\frac{1}{n} \sum\limits_x (y_1 \ln a_1 + y_2 \ln a_2)\]
+where $C$ is the loss, $n$ is the total number of items in the training data, $x$ is all the training inputs, $y$ is the corresponding desired output based on the ground truth and $a$ is the weights for the current model state. In the above function $a$ is the output from the previous Conv kernel, and represents a sigmoid function of all the weights and biases of the network for the current state of the the model, calculated as: 
+\[a =
+\sigma(z)\]
+\[z =
+\sum_j w_j x_j+b\]
+where $w_jx_j$ represents each weighted input and $b$ is the bias term that is independent of the outputs from the previous layer and is important for smaller CNNs, $z$ is the weighted sum of all the inputs. 
+
+
+The network here used a Softmax classifier that uses cross-entropy output to determine class of the pixel based on the raw loss value shown below:
+\[S_{y_i} = \frac{e^{y_i}}{\sum_j e^{y_j}}\]
+where S is the softmax value for the raw loss of each pixel class $y_i$, and $y_j$ is the sum of the raw loss for all classes.
+More detail on how the Softmax classifier works can be found in \citet{Richmond19b}. Optimisation finds the particular set of weights that work together to minimise the loss (\cite{Karpathy_opt}). It is possible to calculate the best direction along which the weight vector should be changed to produce the steepest gradient for the loss to reach zero. However, it is not possible to determine the length of the steepest gradient section. Therefore the user needs to determine the step size, or learning rate after each iteration (\cite{Karpathy_opt}). For large scale neural networks this is calculated over the size of the batch rather than the entire training set and is often denoted as the Stochastic Gradient Descent (SGD) (\cite{Bottou98,Sutskever13}.
 \par 
 The optimiser used for this study is the \textit{Adam} optimiser. It was created as an algorithm that is well suited to handling large data problems, such as the ones proposed by the remote sensing community. It works by combining two popular algorithms AdaGrad (\cite{duchi11}) and RMSProps (\cite{tielman12}), and optimises the learning rate so that it anneals over time (\cite{kingma14}). The hyperparameters have intuitive interpretations and typically require little tuning, see \citet{kingma14}. In Figure \ref{fig.adam}, it is clear that the \textit{Adam} optimiser shows better convergence than other algorithms.
 
