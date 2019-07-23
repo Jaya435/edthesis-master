@@ -1,5 +1,5 @@
 \chapter{Training a Convolutional Neural Network}
-Once the network has been constructed the user needs to tune the hyperparameters in order to get the best loss and learning rate from their network in the shortest possible time. This is the most time consuming and frustrating part of the process as there are many different parts of the network that can be adjusted to produce different results. The three hyperparameters that need to be adjusted are as follows:
+Once the network has been constructed the user needs to tune the hyperparameters in order to get the best loss and learning rate from their network in the shortest possible time. This is the most time consuming part of the process as there are many different parts of the network that can be adjusted to produce different results. The three hyperparameters that need to be adjusted are as follows:
 \begin{itemize}
     \item The number of filters in the convolutional layers
     \item The batch size
@@ -7,13 +7,13 @@ Once the network has been constructed the user needs to tune the hyperparameters
 \end{itemize}
 These will be discussed further in the following chapter. There are other hyperparameters that can be adjusted but considering the time and resources available this was not possible within the scope of this thesis. 
 \par
-At the end of this chapter there will be a brief discussion about the other hyperparamters that could have been adjusted that were not within the scope of this study. 
+At the end of this chapter there will be a brief discussion about the other hyperparameters that could have been adjusted that were not within the scope of this study. 
 \section{Number of Filters}
 The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be. This variable was mentioned in Section \ref{sub.CNN}, where self.cr was the number of filters to be determined by the user. Most CNNs tend to use numbers that are a power of 2 for all stages of implementation, as we can see from Figure \ref{fig.filter_size} larger filters result in generally lower losses for our data. 
 \begin{figure}[H]
 \centering
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/learning_rate1net_size4batch8epochs100.png}
+\includegraphics[width=\textwidth]{\dir/figs/arch/}
 \caption{}
 \label{fig.filter4l}
 \end{subfigure}%

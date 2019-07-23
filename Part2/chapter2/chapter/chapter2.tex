@@ -5,13 +5,13 @@ Originally the project was going to look at classifying some of the data made av
 \begin{table}
     \centering
     \caption{Summary of key datasets used for this project.}
-\begin{tabular}{ p{1.5in} p{2in} p{1.5in} }\toprule
+\begin{tabular}{ p{1.6in} p{2in} p{1.5in} }\toprule
 \textbf{Data Source}& \textbf{Key Features} & \textbf{Pre-Processing Steps} \\ \toprule
-Inria Aerial Image Labeling Dataset taken from work done by \cite{maggiori17a}. All imagery was constructed from public domain imagery and public domain official building footprints. &Training data of 180 colour image tiles with associated ground truth mask of building or not building \newline Test data of 180 colour image tiles \newline Images cover dissimilar urban settings from densely populated to sparsely, across the USA and Europe.\newline Each tile is 5000x5000 pixels, with a pixel size of 30cm, covering an area of 1.5km$^2$. 
+Inria Aerial Image Labeling Dataset taken from work done by \cite{maggiori17a}. All imagery was constructed from public domain imagery and public domain official building footprints. \url{https://project.inria.fr/aerialimagelabeling/} &Training data of 180 colour image tiles with associated ground truth mask of building or not building \newline Test data of 180 colour image tiles \newline Images cover dissimilar urban settings from densely populated to sparsely, across the USA and Europe.\newline Each tile is 5000x5000 pixels, with a pixel size of 30cm, covering an area of 1.5km$^2$. 
 & Data is already aerial orthorectified and comes with its own training data, no pre-processing steps required.  \\ \midrule
-VHR imagery from Digital Globe before and following the Californian Wildfire – 30cm resolution&
+VHR imagery from Digital Globe before and following the Californian Wildfire – 30cm resolution. \url{https://www.digitalglobe.com/ecosystem/open-data/california-wildfires}&
 Access to archived and up to date imagery following natural disasters to aid humanitarian efforts \newline
-30cm resolution \newline
+30cm resolution.  \newline
 Covers a very large area of California \newline
 Unfortunately there is no ground truth data available, a small portion of the data will need to be manually mapped in order to validate the model.
 & Imagery comes pre-processed. Including, orthorectification, atmospheric compensation, dynamic range adjustment and pan-sharpening. \newline

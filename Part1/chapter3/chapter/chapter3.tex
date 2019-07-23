@@ -16,32 +16,32 @@ A simple grid search was used to iterate over a list of all possible combination
 The following sections will show the effect of changing one of the hyperparameters while fixing the other two. The key four characteristics to observe as mentioned in Section \ref{sec.model_training} are:
 \begin{enumerate}
     \item Loss should be decreasing, rapidly at first and then slowing down as training progresses. Once the decrease in loss stagnates, training should stop.
-    \item Validation accuracy should be slightly higher than training accuracy once training is complete. Training should continue while validation loss is lower than the training accuracy.
+    \item Validation accuracy should be slightly higher than training accuracy once training is complete. Training should continue while validation accuracy is lower than the training accuracy.
     \item If training accuracy reduces without an increase in validation accuracy, training should continue
     \item Once validation accuracy starts to increase, training should discontinue. 
 \end{enumerate}
 \subsection{Adjusting the Learning Rate}
-Adjusting the learning rate adjusts the length the weight vector is travelled on before the loss is calculated again for the next iteration. A smaller learning rate means a smaller adjustment to the weights between iterations. In Figure \ref{fig.lr_varied} the loss rate that shows the most optimal rate of decay is a learning rate of 0.001. After each iteration, the training loss has decrease and the validation loss has remained lower. In contrast, the loss rate for a learning rate of 0.0001 shows a lot of fluctuation in the validation loss and is not displaying a fast decay in of the loss rate. Additionally, the loss rate of 0.1 does not show much variation in the training loss, so would not be considered when continuing training. The learning rate of 0.01, while there is a great deal of fluctuation, the loss is gradually decaying over time. 
+Adjusting the learning rate adjusts the length the weight vector is travelled on before the loss is calculated again for the next iteration. A smaller learning rate means a smaller adjustment to the weights between iterations. In Figure \ref{fig.lr_varied} the loss rate that shows the most optimal rate of decay is a learning rate of 0.001. There is a decreasing loss rate over time and it does not appear to have reduced in gradient by the end of 100 epochs. Validation accuracy is still lower than training accuracy and so training should continue. In contrast, the loss for a learning rate of 0.0001 shows a lot of variation in the loss and is not displaying a fast decay. The other two learning rate show a loss that has converged and is no longer decreasing so would not be suitable for continued training.
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{\dir/figs/lr_varied.png}
-    \caption[Example of the affect of changing the learning rate]{Example of how the learning rate affects the training progression over 100 epochs. The accuracy values have been smoothed using a moving window of 5, the smoothed training loss uses a moving window of 10.}
+    \caption[Example of the affect of changing the learning rate]{Example of how the learning rate affects the training progression over 100 epochs. Learning rate increases from  0.0001 to 0.1 by a factor of ten in each plot. The accuracy values have been smoothed using a moving window of 5, the smoothed training loss uses a moving window of 10.}
     \label{fig.lr_varied}
 \end{figure}
 \subsection{Adjusting the Batch Size}
-As demonstrated in Section \ref{sec.batch_size}, changing the batch size affects the depth of the stack of training samples that input into the network on each iteration. Where the batch size is larger than the number of training samples, the batch dimension becomes the number of training samples. For the final plot, the batch size will be 108. The variability in training loss is minimal in the final plot, however, validation is greater than training loss after 100 epochs, so training cannot continue for that combination of hyperparameters. The four previous plots all demonstrate a decaying loss rate as learning progresses. However, with a batch size of 16 and 32, the validation loss has some quite large fluctuations that are greater than the training loss indicative of overfitting and making them less optimal choices as a hyperparameter. 
+As demonstrated in Section \ref{sec.batch_size}, changing the batch size affects the depth of the stack of training samples that input into the network on each iteration. Where the batch size is larger than the number of training samples, the batch dimension becomes the number of training samples. For the final plot, the batch size will be 108. All the plots display a decreasing loss over 100 epochs, changing the size of the batch for this set of hyperparameters has not effected the variation in loss as loss is calculated as an average for the batch. Variation in accuracy however, decreases as the size of the batch increases. None of the plots show better or worse learning rate curves and accuracy so would all be explored again in the next iteration. 
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{\dir/figs/batch_varied.png}
-    \caption[Example of the affect of changing the batch size]{Example of how the batch size affects the training progression over 100 epochs. The number of filters and the learning rate remain fixed, while the batch size is increased by a factor of two for each of the plots.}
+    \caption[Example of the affect of changing the batch size]{Example of how the batch size affects the training progression over 100 epochs. The number of filters and the learning rate remain fixed, while the batch size is increased by a factor of two for each of the plots. Accuracy has been smoothed using a moving window of five and plotting the average, the smoothed training loss uses a moving window of 10.}
     \label{fig.batch_varied}
 \end{figure}
 \subsection{Adjusting the Number of Filters}
-Adjusting the number of filters adjusts how many features are being extracted from the input image and fed into the next layer. With all of the plots, there is decaying in the loss as training progresses. In all of the figures except the first, there is large variability in validation loss with it going above the training loss on multiple occasions. This indicates that an initial filter of two is the optimal hyperparameter for this combination. 
+Adjusting the number of filters adjusts how many features are being extracted from the input image and fed into the next layer. With all of the plots, there is a gradual reduction in the loss as training progresses. Both an initial filter of two and four show loss rates that decrease with the greatest accuracy, so further iterations would explore other hyperparameters in that domain.
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{\dir/figs/net_varied.png}
-    \caption[Example of the affect of changing the number of filters in each Convolution layer]{Example of how changing the number of filters affects the learning rate. The plots show the number of filters increasing from 2 to 128 by a factor of 2 each time.}
+    \caption[Example of the affect of changing the number of filters in each Convolution layer]{Example of how changing the number of filters affects the learning rate. The plots show the number of filters increasing from 2 to 128 by a factor of 2 each time. Accuracy has been smoothed using a moving window of five and plotting the average, the smoothed training loss uses a moving window of 10.}
     \label{fig.net_varied}
 \end{figure}
 \section{Accuracy}
@@ -139,5 +139,3 @@ To see how well the model has predicted where building are or aren't, the weight
     \caption[Image Prediction using the model with the best accuracy]{Image prediction using the model trained with the hyperparameters that produce the highest accuracy. Side by side comparison of the ground truth labels and the model prediction is clearly shown.}
     \label{fig.prediction}
 \end{figure}
-
-Tile together the rasters from all of the different places, then confusion matrix each one to see how accurate the model was for each city... That is the final result
