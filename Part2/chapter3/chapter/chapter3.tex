@@ -78,7 +78,7 @@ This is adjusted when the weights and biases of the network change with each tra
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{\dir/figs/moving_filter.png}
-    \caption[Example of one Convolutional filter]{The Convolutional filter generates an activation map as it moves across the whole image. The stride is 2 and the padding is 1 resulting in the spatial dimensions being reduced for the output image. This is the case if their were only one filter being implemented in the Conv layer.}
+    \caption[Example of one Convolutional filter]{The Convolutional filter generates an activation map as it moves across the whole image. The stride is 2 and the padding is 1 resulting in the spatial dimensions being reduced for the output image. This is the case if there were only one filter being implemented in the Conv layer.}
     \label{fig.moving_filter}
 \end{figure}
 The dimensions in the output layer are controlled by the depth, stride and padding. 
@@ -111,13 +111,43 @@ Covariate shift is a result of bias in the dataset and a more in depth look and 
 \section{Activation Layer}
 There are many different types of activation functions that can be used with CNNs. Some of functions are better suited to different applications. ReLU(Rectified Linear Unit) is the most reliable and can be used as a good approximation for all applications. \par
 Activation functions introduce non-linear properties on the network and convert an input signal to an output one. They sum the product of the inputs and their corresponding weights and apply the function to get the output and feed it as an input for the next layer. Without an activation function the output would be a linear function. These are limited in their complexity and cannot learn complex functional maps from the data. A neural network without an activation function is simply a linear regression model. Activation functions allow the user to represent non-linear arbitrary functional mappings between inputs and outputs. \par
+As mentioned in the previous section, each Conv layer contains a number of activation maps as defined by the user. Each one of these maps contains a different non-linear activation function that returns a signal based on the input signal from the previous Conv layer. 
+\par
+Some common non-linear activation functions include the sigmoid function (Figure \ref{fig.sigmoid})
+\[S(z) = \frac{1} {1 + e^{-z}}\]
+and the tanh function (Figure \ref{fig.tanh})
+\[tanh(z) = \frac{e^{z} - e^{-z}}{e^{z} + e^{-z}}\]
+where $z$ is the input into the activation layer and $S(z)$ and $tanh(z)$ are the resulting outputs between 0-1 and -1-1, respectively.
+\par
+The sigmoid function causes large negative numbers to become 0 and large positive numbers to become 1. At the minima and the maxima, the output values respond very little to changes in the input values and result in what are known as 'vanishing gradients'. The gradient of the network is calculated by finding the derivatives of the while network by moving backwards from the initial layer to the final layer. While using a sigmoid function, derivatives of numbers larger than 1 and smaller than 0, produce small derivatives. These are then multiplied together, which exponentially decreases the gradient as backpropogation moves from the final layer to the initial layer.  
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.5\textwidth]{\dir/figs/relu.jpeg}
-    \caption{ReLu function.}
-    \label{fig.relu}
+\centering
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/sigmoid.jpeg}
+\caption{}
+\label{fig.sigmoid}
+\end{subfigure}%
+\qquad
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/tanh.jpeg}
+\caption{}
+\label{fig.tanh}
+\end{subfigure}
+\caption[Sigmoid Activation Functions and Derivative]{(a) Sigmoid non-linearity that squashes the real numbers to be between 0 and 1. (b) Tanh function that squashes real numbers to be between -1 and 1 (\cite{Karpathy1}).}
+\label{fig.activation_functions}
 \end{figure}
-ReLU corrects a value to be 0 when $<$ 0 and then linear with slope of 1 when x $>$ 0. Figure \ref{fig.relu} shows the function in graphical form. \citet{krizhevsky17} shows the ReLU functions to be 6 times faster than Tanh. 
+Tanh is preferred to sigmoid because it is 0 centred and produces a stronger derivative gradient than sigmoid but can still result in vanishin gradients. One solution to avoiding this problem is to use batch normalisation, which normalises the value of the input so that it does not approach the maximim and minimum values for the two activation functions as mentioned previously.
+\par
+Another solution is to use a different activation function. The Rectified Linear Units (ReLU) (\cite{krizhevsky17, nair10}) function corrects a value to be 0 when $<$ 0 and then linear with slope of 1 when x $>$ 0
+\[\begin{split}R(z) = \begin{Bmatrix} z & z > 0 \\
+ 0 & z <= 0 \end{Bmatrix}\end{split}\]
+ where $z$ is the input to the activation function and $R(z)$ is the output. The derivative of the ReLu function is 0  of x $<$ 0 and 1 when x $<$ 0. Figure \ref{fig.reluA} shows the function in graphical form. The ReLu function is used in this study as it has been shown to reach a 25\% error rate six times faster than the tanh function.
+ \begin{figure}
+     \centering
+     \includegraphics[width=0.45\textwidth]{\dir/figs/tanhvsrelu.PNG}
+     \caption[Relu Activation Function Versus Tanh]{ReLu's \textbf{solid line} reaches a 25\% error six times faster than Tanh's \textbf{dashed line}. This has been tested on a four layer CNN trained in the CIFAR-10 dataset by \citet{krizhevsky17}.}
+     \label{fig.tanhvsrelu}
+ \end{figure}
 \section{Pool Layer}
 It is common for CNNs to insert a pooling layer in between successive convolutional layers. This aggregates the data and reduce the parameters and computation for the network. Pooling operates independently on every depth slice (image band in the first layer, and then the stacked \textit{feature maps} subsequently) and resizes it spatially using the max function. This is analogous to raster resampling. Most commonly this process is done using a 2x2 moving filter with a stride of two that downsamples every depth slice by a factor of two. The depth dimension of the data remains unaffected by this process (Figure \ref{fig.pooling}).
 \begin{figure}[htbp]
@@ -156,7 +186,7 @@ class SegBlockDecoder(nn.Module):
         y=self.model(x)
         return y
 \end{lstlisting}
-The decoder is used to restore the original image size in the decoder so that the network can make a prediction about every image in the original image. This is not another convolution but rather an upsampling method that preserves the weights and biases that have been calculate within the network before a comparison between the predicted output and the ground truth output. This is called a transposed convolution, the architecture of this is shown in Listing \ref{lst.decoder}, where in line 5 we see the use of the \texttt{nn.ConvTranspose2d} function in order to deconvolve the data. This is again striving to make the CNN as simple as possible in order to make it as generative as possible (\cite{Springenberg14}).
+The decoder is used to restore the output to the original image resolution so that the network can make a prediction about every pixel in the original image. This is not another convolution but rather an upsampling method that preserves the weights and biases that have been calculate within the network before a comparison between the predicted output and the ground truth output. This is called a transposed convolution, the architecture of this is shown in Listing \ref{lst.decoder}, where in line 5 we see the use of the \texttt{nn.ConvTranspose2d} function in order to deconvolve the data. This is again striving to make the CNN as simple as possible in order to make it as generative as possible (\cite{Springenberg14}).
 
 \section{Fully Connected Layer}
 The common convention for neural networks is to the last layers of the network to be fully connected layers. These are layers where all the inputs from one layer are connected to every activation unit in the next layer. FC layers accept an input from the previous layer (Pool or Conv layer in most CNNs), and output an N-dimensional vector where N is the number of classes (\cite{simard03}). This fully connected architecture works for small images, where each image belongs to one class and the network tries to identify which class that is. However, our network classifies each pixel via semantic segmentation of very large, high resolution imagery.
@@ -194,8 +224,30 @@ class Net(nn.Module):
 \end{lstlisting}
 For this architecture there are five layers for the forward pass, and five layers for the mirrored backward pass. In Listing \ref{lst.CNN} line 2 cr corresponds to the number of filters in the convolutional layer. This is a hyperparameter and needs to be adjusted in order to fine tune the model to optimise the results. The softmax function on line 21 is a binary linear regression classifier for multiple classes. It allows the user to compute the probability of a pixel belonging to one class or another and forms the output of the CNN.
 \subsection{Softmax Classifier}\label{sec.softmax}
-The final layer of the CNN outputs a multidimensional array with the raw scores for each pixel. As our model is a binary classification problem, the score corresponds to how likely the pixel belongs to one class or the other. The vector is then input into the softmax classifier, which outputs the probability scores that sum to 1. For each pixel, the softmax classifier takes the exponent of the raw score for each class and divides it by the sum of the exponents of all raw class scores. As shown below:
+The final layer of the CNN outputs a multidimensional array with the raw scores for each pixel. As our model is a binary classification problem, the score corresponds to how likely the pixel belongs to one class or the other. As explained in \citet{Richmond19a}, this raw loss vector score is calculated using binary cross entropy loss. The vector score is then input into the softmax classifier, which outputs the probability scores for each class so that they sum to 1. For each pixel, the softmax classifier takes the exponent of the raw score for each class and divides it by the sum of the exponents of all raw class scores.
+\par
+Cross entropy loss is shown as follows:
+\begin{eqnarray} 
+  C = -\frac{1}{n} \sum_x \left[y \ln a + (1-y ) \ln (1-a) \right],
+\end{eqnarray}
+where $n$ is the number of training samples, $x$ is the training sample, $a = \sigma(z)$ where $z =
+\sum_j w_j x_j+b$
+which is the output from the kernel and y is the desired output( in our case the ground truth). The output from each kernel can be shown simply by Figure \ref{fig.weights}. Each kernel take several inputs ($x_1, x_2, x_3....$) and their corresponding weights ($w_1, w_2, w_3......$) and a bias $b$, resulting in $a$ as the weighted sum of the inputs (\cite{nielsen15}). 
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.45\textwidth]{\dir/figs/weights.png}
+    \caption[Schematic Convolutional Neuron]{Schematic of the inputs into each convolutional filter or kernel, and the corresponding output for the next layer in the network (\cite{nielsen15}).}
+    \label{fig.weights}
+\end{figure}
+
+The results of cross-entropy is that if the output of the kernel is close to that of the ground truth for all the training samples, then the cross-entropy loss will return a value close to 0.
+\par
+The softmax classifier can be defined as follows
 \[S_{y_i} = \frac{e^{y_i}}{\sum_j e^{y_j}}\]
-
-
+where S is the softmax value for the raw loss of each pixel class $y_i$, and $y_j$ is the sum of the raw loss for all classes. For our model, we are interested in the two classes, \textit{building} and \textit{non-building}. The raw loss score is fed into the equation as a vector comprising of two raw scores, the Softmax classifier then computes a score for each class the sum of which is 1.
+\par
+This derivation can be taken one step further and the softmax classifier can be combined with the cross-entropy loss function as shown below
+\[C_x=-\ln(a_i)=-\ln\left(\frac{e^{y_i}}{\sum_je^{y_j}}\right).\]
+where C is the score for each class based on the training inputs, their weights and the associated bias. The score will sum to 1 to give the probability of that pixel belonging to one class or the other.
 
