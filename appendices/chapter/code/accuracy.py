@@ -12,9 +12,9 @@ import torch
 parser = argparse.ArgumentParser()
 parser.add_argument('--path',help='path to train directory',type=str,default='/exports/eddie/scratch/s1217815/AerialImageDataset/train/')
 parser.add_argument('--model_path', help='path to saved models',type=str, default='/exports/csce/eddie/geos/groups/geos_cnn_imgclass/data/saved_models/')
+parser.add_argument('--out_dir',help='path to results directory',type=str,default='/home/s1217815') 
 
-
-def model_accuracy(models,image_paths, target_paths):
+def model_accuracy(models,image_paths, target_paths, results_dir):
     accList = []
     for model in models:
         print ('Path to model {}'.format(model))
@@ -25,11 +25,14 @@ def model_accuracy(models,image_paths, target_paths):
         match = re.search('arch(\d+)', base_model)
         net_size = match.group(1)
         net_size = int(net_size)
+        lr = re.search('lr(\d+\.\d+)', base_model)
+        lr = float(lr.group(1))
+        batch = get_batch(base_model)
         net = ConvNet.Net(net_size)
         net = nn.DataParallel(net)
         net.load_state_dict(torch.load(model,map_location=lambda storage, loc: storage))
         #net.cuda()
-        accuracy = ConvNet.model_eval(test_loader, net)
+        accuracy = ConvNet.model_eval(test_loader, net,batch, lr, net_size, results_dir)
         accList.append(accuracy)
     maxInd = accList.index(max(accList))
     print('Highest accuracy: {} for model: {}'.format(accList[maxInd],models[maxInd]))
@@ -44,9 +47,9 @@ def get_batch(model):
 
 if __name__ == "__main__":
     args=parser.parse_args()
-    
-    gd_models = glob.glob(args.model_path+'*.pt')
+    results_dir = args.out_dir
+    gd_models = glob.glob(args.model_path+'/*.pt')
     image_paths, target_paths = glob.glob(args.path+'images/*.tif'), glob.glob(args.path+'gt/*.tif')
-    maxInd = model_accuracy(gd_models, image_paths, target_paths)    
+    maxInd = model_accuracy(gd_models, image_paths, target_paths, results_dir)    
     
 

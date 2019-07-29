@@ -5,96 +5,126 @@ Once the network has been constructed the user needs to tune the hyperparameters
     \item The batch size
     \item The optimiser and the learning rate for said optimiser.
 \end{itemize}
-These will be discussed further in the following chapter. There are other hyperparameters that can be adjusted but considering the time and resources available this was not possible within the scope of this thesis. 
+These will be discussed further in this chapter. There are other hyperparameters that can be adjusted but considering the time and resources available this was not possible within the scope of this thesis. This thesis chose to use a simple grid search to determine which was the most optimal hyperparameter combination. Studies have shows that random search reduces the amount of time required to find the most optimal hyperparameters (\cite{bergstra12}). Building upon random search, there is a new technique that uses bayesian optimisation (\cite{snoek12}) to search for the best combination of hyperparameters.
 \par
 At the end of this chapter there will be a brief discussion about the other hyperparameters that could have been adjusted that were not within the scope of this study. 
-\section{Number of Filters}
-The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be. This variable was mentioned in Section \ref{sub.CNN}, where self.cr was the number of filters to be determined by the user. Most CNNs tend to use numbers that are a power of 2 for all stages of implementation, as we can see from Figure \ref{fig.filter_size} larger filters result in generally lower losses for our data. 
-\begin{figure}[H]
+\section{Hyperparameter Search}
+\subsection{Grid Search}
+Grid Searching is the most widely used method for hyperparameter tuning. The user defines a set of discrete values for each hyperparameter they would like to adjust after each iteration. Then, by fixing one and varying the others, they hyperparameters are changed and evaluated throughout training. This method was used here as it is simplest to implement
+\subsection{Random Search}
+\subsection{Bayesian Optimisation}
+
+\section{Hyperparameters}
+\subsection{Number of Filters}
+The convolution depth determines the architecture of the neural network. The user has to decide what value to start with as this dictates how deep the output of the final convolutional layer will be. This variable was mentioned in Section \ref{sub.CNN}, where \texttt{self.cr} was the number of filters to be determined by the user. Most CNNs tend to use numbers that are a power of 2 for all stages of implementation, as we can see from Figure \ref{fig.filter_size}, larger filters result in generally lower losses for our data. 
+\begin{figure}[htbp]
 \centering
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/arch/}
+\includegraphics[width=\textwidth]{\dir/figs/arch/{batch128lr0.01arch2epochs100}.png}
 \caption{}
-\label{fig.filter4l}
+\label{fig.filter2}
 \end{subfigure}%
 \hfill
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate1net_size8batch8epochs100}.png}
+\includegraphics[width=\textwidth]{\dir/figs/arch/{batch128lr0.01arch4epochs100}.png}
+\caption{}
+\label{fig.filter4}
+\end{subfigure}
+\bigskip
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/arch/{batch128lr0.01arch8epochs100}.png}
 \caption{}
 \label{fig.filter8}
 \end{subfigure}
-\bigskip
+\hfill
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate1net_size16batch8epochs100}.png}
+\includegraphics[width=\textwidth]{\dir/figs/arch/{batch128lr0.01arch16epochs100}.png}
 \caption{}
 \label{fig.filter16}
 \end{subfigure}
-\hfill
+\bigskip
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate1net_size32batch8epochs100}.png}
+\includegraphics[width=\textwidth]{\dir/figs/arch/{batch128lr0.01arch32epochs100}.png}
 \caption{}
 \label{fig.filter32}
 \end{subfigure}
-\caption[Effect of adjusting the filter size on Loss of network]{All four graphs show how adjusting the filter size effects the loss rate of the network after each epoch. (d) has a filter size of 32 and the loss here is generally smaller than in the other examples.}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/arch/{batch128lr0.01arch64epochs100}.png}
+\caption{}
+\label{fig.filter64}
+\end{subfigure}
+\caption[Effect of adjusting the filter size on Loss of network]{Learning rate increases by a factor of two from two filters up to 64 filters. The dashed line displays the loss smoothed using a moving window of size calculating the average loss. (d) has a filter size of 32 and the loss here is generally smaller than in the other examples.}
 \label{fig.filter_size}
 \end{figure}
-\section{Batch Size}
+\subsection{Batch Size}
 The batch size changes the size of the stack of data that is being fed into the neural network. A batch size of 1 will show a large fluctuation on the loss compared to a batch size the encompasses the whole dataset. A batch size that is the same size as the dataset should have small fluctuations in the loss unless the learning rate is too high. This is likely the case for the examples given in Figure \ref{fig.batch_size}
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.01net_size32batch8epochs100}.png}
+\includegraphics[width=\textwidth]{\dir/figs/batch/{batch16lr0.01arch16epochs100}.png}
 \caption{}
-\label{fig.br8l}
+\label{fig.br18}
 \end{subfigure}%
 \hfill
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.01net_size32batch16epochs100}.png}
-\caption{}
-\label{fig.br16}
-\end{subfigure}
-\bigskip
-\begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.01net_size32batch32epochs100}.png}
+\includegraphics[width=\textwidth]{\dir/figs/batch/{batch32lr0.01arch16epochs100}.png}
 \caption{}
 \label{fig.br32}
 \end{subfigure}
-\hfill
+\bigskip
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.01net_size32batch64epochs100}.png}
+\includegraphics[width=\textwidth]{\dir/figs/batch/{batch64lr0.01arch16epochs100}.png}
 \caption{}
 \label{fig.br64}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/batch/{batch128lr0.01arch16epochs100}.png}
+\caption{}
+\label{fig.br128}
 \end{subfigure}
 \caption[Effect of adjusting the batch size on Loss of network]{All four graphs show how adjusting the batch size rate effects the loss rate of the network after each epoch. (d) The largest batch size shows consistently the lowest loss.}
 \label{fig.batch_size}
 \end{figure}
-\section{Learning Rate and Optimizer}
-The optimiser works to adjust the weights of the model before another training run is performed in order to decrease the loss of the network after each run. 
-The standard optimiser for CNNs is Stochastic Gradient Descent, for this project a slight variation on this has been used, which is the ADAM optimiser. This works in a similar way but has some clever inbuilt variables that prevent the optimiser becoming stuck and the loss rate converging. 
-  \begin{figure}[H]
+\subsection{Learning Rate and Optimizer}
+Optimisation works by finding the shortest path to the set of weights and biases that produce the lowest loss. If we consider our loss as a landscape, there will be peaks and troughs but ultimately a deepest point as shown in Figure \ref{fig.loss_landscape}. This deepest point is where the weights and biases have produced the lowest loss, searching for the quickest route to the deepest point is known as gradient descent.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.8\textwidth]{\dir/figs/challenges-1.png}
+    \caption[3D Schematic of CNN Loss]{Loss of the network is displayed as a 2D surface in 3D space. The  two issues that can prevent optimisation are labelled. Low loss is represented in blue and a high loss is represented as red. Taken from \citet{kathuria18}}
+    \label{fig.loss_landscape}
+\end{figure}
+\par
+The standard gradient descent algorithm for deep learning and CNNs is Stochastic Gradient Descent (SGD) (\cite{robbins51}). It is one of the most used training algorithms that despite it simplicity performs empirically well across a variety of applications. SGD has trouble navigating local minima (Figure \ref{fig.loss_landscape}), and will oscillate around the slopes and not converge on a loss. If we consider the optimisation as a ball starting from A in Figure \ref{fig.loss_landscape}, as it moves down towards the local minima, the ball gains inertia. SGD is improved by using a momentum method that simulates inertia so the function can escape local minima and saddle points to find the global minima of loss (\cite{ruder16}). 
+\par
+This project has focused on a variation of SGD with momentum known as the \textit{adam} optimiser (\cite{kingma14}). This is one of a group of algorithms known as adaptive gradient descent algorithms as they dynamically adjust their parameters as training progresses depending on what has happened in the past. The \textit{adam} optimiser updates the learning rate at each step as well as using momentum to make sure the optimiser does not oscillate within a local minima or on a saddle point. 
+\par
+It has been shown that when using sparse datasets it is more effective to use an adaptive algorithm as it allows for an initially high learning rate to be used as it will reduce as training progresses. \citet{kingma14} showed that the \textit{adam} optimiser preformed the best out of the other adaptive gradient descent algorithms and is what has been used for this project. 
+  \begin{figure}[htbp]
 \centering
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/learning_rate1net_size32batch8epochs100.png}
+\includegraphics[width=\textwidth]{\dir/figs/lr/{batch128lr0.0001arch16epochs100}.png}
 \caption{}
-\label{fig.lr1l}
+\label{fig.lr0.0001l}
 \end{subfigure}%
 \hfill
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.1net_size32batch8epochs100}.png}
-\caption{}
-\label{fig.lr0.1}
-\end{subfigure}
-\bigskip
-\begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.001net_size32batch8epochs100}.png}
+\includegraphics[width=\textwidth]{\dir/figs/lr/{batch128lr0.001arch16epochs100}.png}
 \caption{}
 \label{fig.lr0.001}
 \end{subfigure}
+\bigskip
+\begin{subfigure}{0.45\textwidth}
+\includegraphics[width=\textwidth]{\dir/figs/lr/{batch128lr0.01arch16epochs100}.png}
+\caption{}
+\label{fig.lr0.01}
+\end{subfigure}
 \hfill
 \begin{subfigure}{0.45\textwidth}
-\includegraphics[width=\textwidth]{\dir/figs/{learning_rate0.0001net_size32batch8epochs100}.png}
+\includegraphics[width=\textwidth]{\dir/figs/lr/{batch128lr0.1arch16epochs100}.png}
 \caption{}
-\label{fig.lr0.0001}
+\label{fig.lr0.1}
 \end{subfigure}
 \caption[Effect of adjusting learning rate on Loss of network]{All four graphs show how adjusting the learning rate of the optimiser effects the loss rate of the network after each epoch. (b) returns the lowest loss, however there is a lot of fluctuation to the returned loss..}
 \label{fig.learning_rate}

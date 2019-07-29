@@ -6,6 +6,7 @@ import torch
 import itertools as it
 from PIL import Image
 import os
+import errno
 import random
 import glob
 import os.path as osp
@@ -28,15 +29,14 @@ from torch.autograd import Variable
 from torch.utils.data.sampler import SubsetRandomSampler
 import pandas as pd
 
-
-
 parser = argparse.ArgumentParser(description='Main script to implement the CNN')
 parser.add_argument('--path',help='path to train directory',type=str,default='/exports/eddie/scratch/s1217815/AerialImageDataset/train/')
+parser.add_argument('--out_dir',help='path to results directory',type=str,default='/home/s1217815')
 parser.add_argument('--batch_size',help='select batch size', type=int,default=128)
 parser.add_argument('--lr',help='learning rate for optimizer',type=float,default=0.001)
 parser.add_argument('--num_epochs',help='Number of epochs',type=int,default=100) 
 parser.add_argument('--arch_size', help='inital depth of convolution', type=int,default=64)
-parser.add_argument('--model_dict',help='Path to where model best state is saved',type=str, default='/exports/csce/eddie/geos/groups/geos_cnn_imgclass/data/saved_models/')
+
 
 class SegBlockEncoder(nn.Module):
     def __init__(self,in_channel,out_channel, kernel=4,stride=2,pad=1):
@@ -247,7 +247,7 @@ def train_eval(train_loader, valid_loader, n_epochs, model, optimizer,criterion,
             print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
             valid_loss_min,
             valid_loss))
-            torch.save(model.state_dict(), model_dict+'model_inria_batch{}_lr{}_arch{}_epochs{}.pt'.format(
+            torch.save(model.state_dict(), model_dict+'/model_inria_batch{}_lr{}_arch{}_epochs{}.pt'.format(
                 args.batch_size,args.lr,args.arch_size,args.num_epochs))
             valid_loss_min = valid_loss
     finish = time.time()
@@ -257,7 +257,7 @@ def train_eval(train_loader, valid_loader, n_epochs, model, optimizer,criterion,
     df['Valid Acc'] = validAccArr
     df['Train Acc'] = trainAccArr
     print(df)
-    df.to_csv('bce_loss/batch{}lr{}arch{}epochs{}.csv'.format(args.batch_size, args.lr, args.arch_size, args.num_epochs))
+    df.to_csv('{}/batch{}lr{}arch{}epochs{}.csv'.format(results_dir,args.batch_size, args.lr, args.arch_size, args.num_epochs))
     return(train_run_loss,valid_run_loss)
 
 def train_valid_test_split(image_paths, target_paths,batch_size):
@@ -287,7 +287,7 @@ def train_valid_test_split(image_paths, target_paths,batch_size):
     test_loader = DataLoader(dataset, batch_size, num_workers=0, sampler=test_sampler)
     return (train_loader, valid_loader, test_loader)
 
-def model_eval(test_loader,net):
+def model_eval(test_loader,net, batch_size, lr, arch_size, results_dir):
     net.eval()
     with torch.no_grad():
         count = 0
@@ -307,17 +307,18 @@ def model_eval(test_loader,net):
             correct += (predicted == labels).sum().item()
         print('Correct: {}, Total: {}'.format(correct,total))
         stop = time.time()   
-        result = ('Accuracy: {:.3f} %, Time: {:.2f}s, Batch_Size: {}, Learning Rate: {}, Initial Architecture: {}'.format(((correct / total)*100),(stop-start),args.batch_size, args.lr, args.arch_size))
+        result = ('Accuracy: {:.3f} %, Time: {:.2f}s, Batch_Size: {}, Learning Rate: {}, Initial Architecture: {}'.format(((correct / total)*100),(stop-start),batch_size, lr, arch_size))
         print(result)
-        f = open('results_120.txt','a')
+        f = open(results_dir+'/results_120.txt','a')
         f.write(result + '\n')
         f.close()
-        
+    return ((correct/total)*100)
 if __name__ == "__main__":
 
     args = parser.parse_args()
-    
-    
+    cwd = os.getcwd()
+    results_dir = args.out_dir
+                                                
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') 
     
     image_paths = glob.glob(args.path+'images/*.tif') 
@@ -335,23 +336,24 @@ if __name__ == "__main__":
         print("Let us use",torch.cuda.device_count(),"GPUS!")
         net = nn.DataParallel(net)
         net.to(device)
-        train_run_loss,valid_run_loss = train_eval(train_loader, valid_loader, args.num_epochs, net,optimizer,criterion,args.model_dict)
+        train_run_loss,valid_run_loss = train_eval(train_loader, valid_loader, args.num_epochs, net,optimizer,criterion,args.out_dir)
         plt.plot(train_run_loss,label='Training Loss')
         plt.plot(valid_run_loss,label='Validation Loss')
         plt.ylabel('Loss')
         plt.xlabel('Epochs')
         plt.legend()
-        plt.savefig('lr{}net_size{}batch{}epochs{}.png'.
-                    format(args.lr,args.arch_size,args.batch_size,args.num_epochs),bbox_inches='tight')
+        plt.savefig('{}/lr{}net_size{}batch{}epochs{}.png'.
+                    format(results_dir,args.lr,args.arch_size,args.batch_size,args.num_epochs),bbox_inches='tight')
     else:
         net.to(device)
         print(next(net.parameters()).is_cuda)
-        train_run_loss,valid_run_loss = train_eval(train_loader,valid_loader,args.num_epochs, net,optimizer,criterion, args.model_dict)
+        train_run_loss,valid_run_loss = train_eval(train_loader,valid_loader,args.num_epochs, net,optimizer,criterion, args.out_dir)
     #load best model
     net = Net(cr=args.arch_size)
     net = nn.DataParallel(net)
     net.to(device)
-    net.load_state_dict(torch.load(args.model_dict+'model_inria_batch{}_lr{}_arch{}_epochs{}.pt'.format(args.batch_size,args.lr,args.arch_size,args.num_epochs)))
-    model_eval(test_loader,net) 
+    net.load_state_dict(torch.load(args.out_dir+'/model_inria_batch{}_lr{}_arch{}_epochs{}.pt'.format(args.batch_size,args.lr,args.arch_size,args.num_epochs)))
+    accuracy = model_eval(test_loader,net, args.batch_size, args.lr, args.batch_size,results_dir)
+ 
     
     
