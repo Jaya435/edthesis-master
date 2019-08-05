@@ -22,7 +22,8 @@
 \pagenumbering{gobble}
 \part{Research Paper}
 \pagenumbering{arabic} 
-\chapter{Abstract}
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract} 
 \markboth{\MakeUppercase{Abstract}}{\MakeUppercase{Abstract}}
 \input{\dir/abstract1.tex}
 \mainmatter
@@ -64,6 +65,7 @@ title={References}
   \frontmatter
   \pagenumbering{gobble}
   \part{Technical Report}
+  \pagenumbering{gobble}
 
   \pagenumbering{roman} 
 %}
@@ -102,6 +104,7 @@ title={References}
 %S\setcounter{chapter}{0}
 %========================= CHAPTERS ========================= 
 \renewcommand{\dir}{../Part2/chapter1/chapter/}
+\pagenumbering{arabic} 
 \input{\dir/chapter1.tex}
 \renewcommand{\dir}{../Part2/chapter2/chapter/}
 \input{\dir/chapter2.tex}
@@ -151,4 +154,4 @@ title={References}
 \chapter*{Appendices}
 \input{\dir/appendix1.tex}
 \input{\dir/appendix2.tex}
-
+\input{\dir/appendix3.tex}

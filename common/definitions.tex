@@ -109,13 +109,22 @@
 }
 \lstset{style=mystyle}
 
-\defbibenvironment{bibliography}
-  {\enumerate
-     {}
-     {\setlength{\leftmargin}{\bibhang}%
-      \setlength{\itemindent}{-\leftmargin}%
-      \setlength{\itemsep}{\bibitemsep}%
-      \setlength{\parsep}{\bibparsep}}}
-  {\endenumerate}
-  {\item}
+% \defbibenvironment{bibliography}
+%   {\enumerate
+%      {}
+%      {\setlength{\leftmargin}{\bibhang}%
+%       \setlength{\itemindent}{-\leftmargin}%
+%       \setlength{\itemsep}{\bibitemsep}%
+%       \setlength{\parsep}{\bibparsep}}}
+%   {\endenumerate}
+%   {\item}
+  
+\makeatletter
+\newcommand{\unchapter}[1]{%
+  \begingroup
+  \let\@makechapterhead\@gobble % make \@makechapterhead do nothing
+  \chapter{#1}
+  \endgroup
+}
+\makeatother
 

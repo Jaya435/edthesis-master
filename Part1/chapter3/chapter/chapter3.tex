@@ -3,21 +3,21 @@ After extensive testing of different hyperparameters, the model that produced th
 \section{Hyperparameters}
 The following sections will show the effect of changing one of the hyperparameters while fixing the other two. The key four characteristics to observe as mentioned in Section \ref{sec.model_training} are:
 \begin{enumerate}
-    \item Loss should be decreasing, rapidly at first and then slowing down as training progresses. Once the decrease in loss stagnates, training should stop.
+    \item The loss should be decreasing, rapidly at first and then slowing down as training progresses. Once the decrease in loss stagnates, training should stop.
     \item Validation accuracy should be slightly higher than training accuracy once training is complete. Training should continue while validation accuracy is lower than the training accuracy.
     \item If training accuracy reduces without an increase in validation accuracy, training should continue
     \item Once validation accuracy starts to increase, training should discontinue. 
 \end{enumerate}
 \subsection{Adjusting the Learning Rate}
-Adjusting the learning rate adjusts the length the weight vector is travelled on before the loss is calculated again for the next iteration. A smaller learning rate means a smaller adjustment to the weights between iterations. In Figure \ref{fig.lr_varied} the loss rate that shows the most optimal rate of decay is a learning rate of 0.001. There is a decreasing loss rate over time and it does not appear to have reduced in gradient by the end of 100 epochs. Validation accuracy is still lower than training accuracy and so training should continue. In contrast, the loss for a learning rate of 0.0001 shows a lot of variation in the loss and is not displaying a fast decay. The other two learning rate show a loss that has converged and is no longer decreasing so would not be suitable for continued training.
+Adjusting the learning rate adjusts the length the weight vector is travelled on before the loss is calculated again for the next iteration. A smaller learning rate means a smaller adjustment to the weights between iterations. In Figure \ref{fig.lr_varied} the loss rate that shows the most optimal rate of decay is a learning rate of 0.001. There is a decreasing loss rate over time and it does not appear to have reduced in gradient by the end of 100 epochs. Validation accuracy is still lower than training accuracy and so training should continue. In contrast, the loss for a learning rate of 0.0001 shows large variation in the loss and is not displaying a fast decay. The other two learning rate show a loss that has converged and is no longer decreasing so would not be suitable for continued training.
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{\dir/figs/lr_varied.png}
-    \caption[Example of the affect of changing the learning rate]{Example of how the learning rate affects the training progression over 100 epochs. Learning rate increases from  0.0001 to 0.1 by a factor of ten in each plot. The accuracy values have been smoothed using a moving window of 5, the smoothed training loss uses a moving window of 10.}
+    \caption[Example of the affect of changing the learning rate]{Example of how the learning rate affects the training progression over 100 epochs. Learning rate increases from  0.0001 to 0.01 by a factor of ten in each plot. The accuracy values have been smoothed using a moving window of 5, the smoothed training loss uses a moving window of 10.}
     \label{fig.lr_varied}
 \end{figure}
 \subsection{Adjusting the Batch Size}
-As demonstrated in Section \ref{sec.batch_size}, changing the batch size affects the depth of the stack of training samples that input into the network on each iteration. Where the batch size is larger than the number of training samples, the batch dimension becomes the number of training samples. For the final plot, the batch size will be 108. All the plots display a decreasing loss over 100 epochs, changing the size of the batch for this set of hyperparameters has not effected the variation in loss as loss is calculated as an average for the batch. Variation in accuracy however, decreases as the size of the batch increases. None of the plots show better or worse learning rate curves and accuracy so would all be explored again in the next iteration. 
+As demonstrated in Section \ref{sec.batch_size}, changing the batch size affects the depth of the stack of training samples that input into the network on each iteration. Where the batch size is larger than the number of training samples, the batch dimension becomes the number of training samples. For the final plot, the batch size will be 108. All the plots display a decreasing loss over 100 epochs, changing the size of the batch for this set of hyperparameters has not effected the variation in loss as loss is calculated as an average for the batch. Variation in accuracy, however, decreases as the size of the batch increases. None of the plots shows better or worse learning rate curves and accuracy so would all be explored again in the next iteration. 
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{\dir/figs/batch_varied.png}
@@ -35,7 +35,7 @@ Adjusting the number of filters adjusts how many features are being extracted fr
 \section{Accuracy}
 Throughout the training process, the network saves the state of the weights and the biases whenever the loss rate reduces. This model state can then be loaded again at a later data and training can continue. The final stage of training takes the model state that results in the lowest loss and applies it to the test data to make a prediction and evaluate the accuracy.
 \par
-The most accurate model is the model that will be used to make predictions on the test dataset. Table \ref{tab.hyper_param}, shows the results of training over 100 epochs for the defined combinations of the three hyperparameters. A lot of the results are not accurate, with their accuracy below 10\%. The highest accuracy produced is 44-55\%, each of these model runs had 32 initial filters and the final two had batch sizes of 16. The most accurate model had a learning rate of 0.01 and the second most accurate had a learning rate of 0.001. 
+The most accurate model is the model that will be used to make predictions on the test dataset. Table \ref{tab.hyper_param}, shows the results of training over 100 epochs for the defined combinations of the three hyperparameters. A large number of the results are not accurate, with their accuracy below 10\%. The highest accuracy produced is 44-55\%, each of these model runs had 32 initial filters and the final two had batch sizes of 16. The most accurate model had a learning rate of 0.01 and the second most accurate had a learning rate of 0.001. 
 \begin{table}[htpb]
 \centering
 \begin{adjustbox}{totalheight=\textheight-2\baselineskip}
@@ -115,11 +115,11 @@ Figure \ref{fig.3d_hyperparams} shows how most hyperparameter combinations produ
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{\dir/figs/3d_params.png}
-    \caption[3D representation of the accuracy of different hyperparameter combinations]{A 3D representation of Table \ref{tab.hyper_param} plotting the three hyperparameter and colouring them according to their accuracy. Points that are bluer in colour represent ones that produce an accuracy approaching 50\%.  }
+    \caption[3D representation of the accuracy of different hyperparameter combinations]{A 3D representation of Table \ref{tab.hyper_param} plotting the three hyperparameters and colouring them according to their accuracy. Points that are bluer in colour represent ones that produce an accuracy approaching 50\%.  }
     \label{fig.3d_hyperparams}
 \end{figure}
 \section{Predictions}
-To see how well the model has predicted where building are or aren't, the weights and biases of the network are fixed and all the images are sequentially passed through the network and a prediction made on a pixel by pixel basis. Figure \ref{fig.prediction} shows the result of the prediction on the same images as exampled in Figure \ref{fig.inria_dataset}. 
+To see how well the model has predicted where buildings are or aren't, the weights and biases of the network are fixed and all the images are sequentially passed through the network and a prediction made on a pixel by pixel basis. Figure \ref{fig.prediction} shows the result of the prediction on the same images as exampled in Figure \ref{fig.inria_dataset}. 
 
 \begin{figure}[htpb]
     \centering

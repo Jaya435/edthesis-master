@@ -84,40 +84,9 @@ optional arguments:
                         Path to where model is saved, extension should be .pt
 \end{lstlisting}
 If the user does have access to an SGE server and can run the model on GPUs, then they should adjust the previous bash script so that it reads as this:
-\begin{lstlisting}[language=bash, caption = {Bash script to submit the \texttt{ConvNet.py} script to an SGE server, iterating over a list containing a specific number of values}, label={lst.bash_SGE}]
-#!/bin/sh
 
-# Grid Engine options
-#
-#$ -N train_titan
-#$ -cwd
-# -pe gpu 4 
-# -l h_vmem=16G
-#$ -pe gpu-titanx 2
-#$ -l h_vmem=25G
-#$ -l h_rt=03:00:00
+\lstinputlisting[language=bash, caption = {Bash script to submit the \texttt{ConvNet.py} script to an SGE server, iterating over a list containing a specific number of values}, label={lst.bash_SGE}]{\dir/bash_code/model_train.sh}
 
-# Initialise the modules framework
-. /etc/profile.d/modules.sh
-
-# Check amount of memory (in kbytes) as seen by the job
-ulimit -v
-
-# User specified commands go below here
-module load anaconda/5.0.1
-source activate mypytorch2
-
-
-# Read a text file, containing a list of possible combinations#
-input='grid_search_96.txt'
-readarray myArray < "$input"
-set -- ${myArray[$SGE_TASK_ID]}
-# submits batch job to SGE engine
-echo arch _size is "$1"
-
-python ${HOME}/python/ConvNet.py --arch_size "$1" --lr "$2" --batch_size "$3" 
-
-\end{lstlisting}
 The bash script has been configured so as to run on 2 TITAN X GPUs, requesting a virtual memory of 25GB on each, this additionally includes a matching CPU memory of 25GB for each GPU node. The user could comment out lines 9 and 10, and use lines 7 and 8 instead to run on 4 Tesla K80 GPUs instead. This used 4 GPU nodes, with 16GB CPU and 16GB GPU on each
 \par
 Listing \ref{lst.bash_SGE} line 27 is where this bash script differs from \ref{lst.bash} in terms of implementation. The user submits the job with this command: \medskip \\* \texttt{qsub -t 1-98 -tc 20 model\_train.sh}  \medskip \\* where 1-98 is the number of hyperparameter combinations the user would like to iterate over.
@@ -129,68 +98,14 @@ The next section will outline some of the python scripts that were written in or
 \par
 The script \texttt{accuracy.py} (Appendix \ref{app.accuracy}) is used to evaluate the accuracy of all of the saved model states. The user needs to define the path to their train directory and the directory where their saved models are.
 This can be submitted as bash script for the SGE engine as shown below
-\begin{lstlisting}[language=bash, caption = {Bash script required to submit the \texttt{accuracy.py} script. }, label={lst.bash_accuracy}]
-#!/bin/sh
-###########################################
-#                                         #
-#     This job loops over saved models    #
-#     and outputs the most accurate       #
-#                                         #
-###########################################
 
-# Grid Engine Options
-#$ -N Accuracy
-#$ -cwd
-#$ -l h_rt=01:00:00
-#$ -pe sharedmem 16
-#$ -l h_vmem=8G
+\lstinputlisting[language=bash, caption = {Bash script required to submit the \texttt{accuracy.py} script. }, label={lst.bash_accuracy}]{\dir/bash_code/cnn_accuracy.sh}
 
-# Initialise the modules framework
-. /etc/profile.d/modules.sh
-
-# Check amount of memory (in kbytes) as seen by the job
-ulimit -v
-
-# User specified commands go below here
-module load anaconda/5.0.1
-source activate mypytorch
-# Run the program
-python ${HOME}/python/accuracy.py -path /path/to/train/directory -model /path/to/saved/models/
-\end{lstlisting}
 \par
 The script \texttt{raster\_predict.py} (Appendix \ref{app.pred_raster}) is used to iterate over all the images in the train directory and while using the best saved model state, output a raster representing a prediction of the original RGB image. The SGE bash script needed to run this is shown below:
-\begin{lstlisting}[language=bash, caption = {Bash script required to submit the \texttt{raster\_predict.py} script}, label={lst.bash_predRaster}]
-#!/bin/sh
-###########################################
-#                                         #
-# This job predicts and plots where the   #
-# buildings are on an RGB image.          #
-#                                         #
-###########################################
 
-# Grid Engine Options
-#$ -N pred_rst
-#$ -cwd
-#$ -l h_rt=06:00:00
-#$ -pe sharedmem 16
-#$ -l h_vmem=8G
+\lstinputlisting[language=bash, caption = {Bash script required to submit the \texttt{raster\_predict.py} script}, label={lst.bash_predRaster}]{\dir/bash_code/Predict-Raster.sh}
 
-# Initialise the modules framework
-. /etc/profile.d/modules.sh
-
-# Check amount of memory (in kbytes) as seen by the job
-ulimit -v
-wdir = 
-# User specified commands go below here
-module load anaconda/5.0.1
-source activate gdal
-# Run the program
-dir='/exports/eddie/scratch/s1217815/AerialImageDataset/train/images'
-find $dir -type f > filename.txt
-input='filename.txt'
-readarray myArray < ${input}
-python ${HOME}/python/raster_predict.py -model /exports/csce/eddie/geos/groups/geos_cnn_imgclass/data/saved_models/model_inria_batch2_lr0.01_arch16_epochs100.pt -inpfile ${myArray[$SGE_TASK_ID-1]}
-\end{lstlisting}
 The user should change the path at listing \ref{lst.bash_predRaster} line 26 to point to the directory containing their RGB images.
 \paragraph{}
 The script \texttt{predict\_compare.py} (Appendix \ref{app.pred_compare}) is used to again loop over all the RGB images in the train directory. This time the script predicts each pixel class and outputs the original RGB image, the original ground truth image, and the predicted image side by side. 

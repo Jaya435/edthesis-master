@@ -53,23 +53,10 @@ The general architecture that this network is based on is the U-Net architecture
 \section{Convolutional Layer}
 The Conv layer is the core building block for the network. It consist of a set of learnable filters, each filter is spatially small but extends through the full depth of the input. This means that for a 256x256x3 RGB image, a 4x4 filter will look at a spatially small region but at all three colour channels. Our network has been created with a filter of 4x4x3, where 4x4 represents the height and the width and 3 represents the depth of the input i.e. the number of channels or bands. This is shown in line 2 of listing \ref{lst.encoder}, where the kernel size is 4 and our in\_channel is 3. \par
 %\begin{minipage}{\linewidth}
-\begin{lstlisting}[language=Python, caption = {Encoder architecture, performs the convolution on the input volume at each layer in the CNN. Input is a 3D volume of depth, height and width, where the initial depth is the number of channels in the input image. The encoder convolves the data by passing a moving filter of size 4x4, with a stride of 2 and a zero padding of 1, then a batch normalisation is performed and finally an activation function is applied.}, label={lst.encoder},float,floatplacement=htbp]
-class SegBlockEncoder(nn.Module):
-    def __init__(self,in_channel,out_channel,kernel=4,
-                stride=2,pad=1):
-        super().__init__()
-        self.model = nn.Sequential(
-            nn.Conv2d(
-                in_channel,out_channel,kernel,stride=stride,
-                padding=pad,bias=False),
-            nn.BatchNorm2d(out_channel),
-            nn.ReLU(True)
-        )
 
-    def forward(self, x):
-        y=self.model(x)
-        return y
-\end{lstlisting}
+
+\lstinputlisting[language=Python, firstline=41,lastline=54, caption = {Encoder architecture, performs the convolution on the input volume at each layer in the CNN. Input is a 3D volume of depth, height and width, where the initial depth is the number of channels in the input image. The encoder convolves the data by passing a moving filter of size 4x4, with a stride of 2 and a zero padding of 1, then a batch normalisation is performed and finally an activation function is applied.}, label={lst.encoder},float,floatplacement=htbp]{appendices/chapter/code/ConvNet.py}
+
 %\end{minipage}
 As we move down through the network we pass or convolve each filter across the the width and height of the input volume, then compute a weighted sum between the entries of the filter and the input at any position. Each time the filter moves it performs a dot product between the filter and a small section of the input image. So for a 4x4x3 filter, it would be a 48 dimensional dot product plus the bias associated with the network. 
 \[ w^T + b \] where $w$ is the filter.
@@ -171,21 +158,10 @@ For the CNN implemented during this project no pool layer was included. Discardi
 
 \section{Decoder}
 So far we have discussed how the neural network has convolved the data and produced stacked \textit{feature maps} corresponding to what features have been identified. The next step is to backpropagate this data in order to output an image where the network has assigned a most likely class for each pixel based on the weights within the network. 
-\begin{lstlisting}[language=Python, caption = {Decoder architecture, works in the opposite way to the Encoder to transpose so that dimensions match that of the ground truth for comparison.}, label={lst.decoder},float,floatplacement=htbp]
-class SegBlockDecoder(nn.Module):
-    def __init__(self,in_channel,out_channel, kernel=4,stride=2,pad=1):
-        super().__init__()
-        self.model = nn.Sequential(
-            nn.ConvTranspose2d(
-                in_channel,out_channel,kernel,stride=stride,padding=pad,bias=False),
-            nn.BatchNorm2d(out_channel),
-            nn.ReLU(True)
-        )
 
-    def forward(self, x):
-        y=self.model(x)
-        return y
-\end{lstlisting}
+\lstinputlisting[language=Python,firstline=56,lastline=68, caption = {Decoder architecture, works in the opposite way to the Encoder to transpose so that dimensions match that of the ground truth for comparison.}, label={lst.decoder},float,floatplacement=htbp]{appendices/chapter/code/ConvNet.py}
+
+
 The decoder is used to restore the output to the original image resolution so that the network can make a prediction about every pixel in the original image. This is not another convolution but rather an upsampling method that preserves the weights and biases that have been calculate within the network before a comparison between the predicted output and the ground truth output. This is called a transposed convolution, the architecture of this is shown in Listing \ref{lst.decoder}, where in line 5 we see the use of the \texttt{nn.ConvTranspose2d} function in order to deconvolve the data. This is again striving to make the CNN as simple as possible in order to make it as generative as possible (\cite{Springenberg14}).
 
 \section{Fully Connected Layer}
@@ -195,33 +171,8 @@ While our network is "fully connected" it does not contain any fully connected l
 
 \section{Convolutional Neural Network}\label{sub.CNN}
 In Listings \ref{lst.encoder} and \ref{lst.decoder} we have seen the architecture for the individual layers, the final stage is to tie these functions together into a final convolutional neural network as shown in Listing \ref{lst.CNN}.
-\begin{lstlisting}[language=Python, caption = {A Fully connected Convolutional Neural Network. Shows how the encoder and decoder classes are arranged sequentially in order to transform the data and make a prediction on the pixel class.}, label={lst.CNN},float,floatplacement=htbp]
-class Net(nn.Module):
-    def __init__(self,cr = 2):
-        self.cr = cr
-        super(Net,self).__init__()
-        self.encoder = nn.Sequential(
-            SegBlockEncoder(in_channel=3,out_channel=self.cr),
-            SegBlockEncoder(in_channel=self.cr,out_channel=self.cr*2),
-            SegBlockEncoder(in_channel=self.cr*2,out_channel=self.cr*4),
-            SegBlockEncoder(in_channel=self.cr*4,out_channel=self.cr*8),
-            SegBlockEncoder(in_channel=self.cr*8,out_channel=self.cr*16)
-        )
-        self.decoder = nn.Sequential(
-            SegBlockDecoder(in_channel=self.cr*16, out_channel=self.cr*8),
-            SegBlockDecoder(in_channel=self.cr*8, out_channel=self.cr*4),
-            SegBlockDecoder(in_channel=self.cr*4, out_channel=self.cr*2),
-            SegBlockDecoder(in_channel=self.cr*2,out_channel=self.cr),
-            SegBlockDecoder(in_channel=self.cr, out_channel= 2))
-        
-        self.output = nn.Softmax(dim = 1)
-        
-    def forward(self,x):
-        x1 = self.encoder(x)
-        x2 = self.decoder(x1)
-        y = self.output(x2)
-        return y
-\end{lstlisting}
+
+\lstinputlisting[language=Python, firstline=70,lastline=97, caption = {A Fully connected Convolutional Neural Network. Shows how the encoder and decoder classes are arranged sequentially in order to transform the data and make a prediction on the pixel class.}, label={lst.CNN},float,floatplacement=htbp]{appendices/chapter/code/ConvNet.py}
 For this architecture there are five layers for the forward pass, and five layers for the mirrored backward pass. In Listing \ref{lst.CNN} line 2 cr corresponds to the number of filters in the convolutional layer. This is a hyperparameter and needs to be adjusted in order to fine tune the model to optimise the results. The softmax function on line 21 is a binary linear regression classifier for multiple classes. It allows the user to compute the probability of a pixel belonging to one class or another and forms the output of the CNN.
 \subsection{Softmax Classifier}\label{sec.softmax}
 The final layer of the CNN outputs a multidimensional array with the raw scores for each pixel. As our model is a binary classification problem, the score corresponds to how likely the pixel belongs to one class or the other. As explained in \citet{Richmond19a}, this raw loss vector score is calculated using binary cross entropy loss. The vector score is then input into the softmax classifier, which outputs the probability scores for each class so that they sum to 1. For each pixel, the softmax classifier takes the exponent of the raw score for each class and divides it by the sum of the exponents of all raw class scores.

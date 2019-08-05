@@ -2,4 +2,24 @@
 This technical document is intended to accompany the work presented in Richmond (2019), which presents a workflow and evaluation of the use of Convolutional Neural Networks for image classification problems. The document will begin with an overview of the datasets used to train and validate the network, followed by a detailed description on how to construct a neural network, how to prepare the data and how to test the validity of the output. Finally there will be an evaluation of the tools as well as a discussion on the reproduciblity of the work for the future.
 \newline
 At the end of this document there will be a list of appendices with the input metadata and the code structure along with the source code. Locations within the code structure will be highlighted throughout this document as points in which users of the code should input their own datasets. 
+\section{Frameworks}
+This study made use of the open-source framework built by Facebook called PyTorch. This section will give an overview of the other libraries available and discuss why PyTorch was used.
+\par
+The two other key libraries for building deep neural networks are Keras and TensorFlow. A side by side comparison of three available libraries is shown in Table \ref{tab.framework}.
+\begin{table}
+    \centering
+    \caption{Summary of key frameworks for building convolutional neural networks}
+\begin{tabular}{ p{1.6in} p{2in} p{1.5in} }\toprule
+\textbf{Keras} & \textbf{TensorFlow} & \textbf{PyTorch} \\ \toprule
+Open-source neural network library written with Python. Capable of running on top of TensorFlow. & Open-source, software for dataflow programming across a range of tasks. It is a symbolic math library. & Open-source built with Python and based on Torch. \\
+Higher level API, simple syntax and fast to implement. & Both high and low level API & Lower level API focused on direct array expression, preferred solution for research when wanting to apply custom expressions. \\
+Relatively slow & Fast, suitable for high performance  &  Fast, suitable for high performance \\
+Simple architecture, readable and concise &  Not very easy to use & Complex architecture making it difficult to read relative to Keras \\
+Less need to debug simple networks  &  Difficult to debug & Best debugging capabilities \\
+Used for small datasets because simple and slow   & Used for high performance models and large datasets requring fast execution & Used for high performance models and large datasets requring fast execution \\ \bottomrule
+\end{tabular}
+\label{tab.framework}
+\end{table}
 
+There were three main advantages that set PyTorch apart as a superior library to the other two for this project. Firstly, and most importantly, PyTorch allows the user to write a custom \texttt{Dataset} class that can be read by PyTorch's own \texttt{Dataloader} class. The method to do this is outlined in Section 9.2. This is something that is not possible with the other available libraries and would have made it significantly more difficult to optimise the CNN for remote sensing problems.
+Secondly, PyTorch uses declarative data parallelism: by calling \texttt{torch.nn.DataParallel} the model will have its modules labelled so that it can be parallelised over that batch dimension. This means training can be done on different batches in parallel and then brought back together once training has been completed. It also means the model could be trained on multiple GPUs, the best model state saved and then have the data parallel tags removed and used with a single CPU. Finally, there is a large and active community of data scientists that use  PyTorch. The error messages that are thrown up are easy to debug and often that specific error has been posted and commented before. PyTorch also have many tutorials that can be accessed freely and take the user from the very basics of CNNs to implementing their own.

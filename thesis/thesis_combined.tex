@@ -1,4 +1,4 @@
-\documentclass[a4paper,english,12pt]{book}
+\documentclass[a4paper,english,12pt]{report}
 \input{common/packages.tex}
 
 
@@ -7,9 +7,14 @@
 \input{common/definitions.tex}
 \input{common/packages.tex}
 \begin{document}
-\frontmatter
-\pagenumbering{gobble} 
+\pagenumbering{gobble}
+\thispagestyle{empty}
+\includepdf[pages=1,pagecommand={},width=\textwidth]{preface/FC.pdf}
+%\frontmatter
+\pagenumbering{gobble}
+\thispagestyle{empty}
 \input{preface/title.tex}
+
 \pagenumbering{roman} 
 \input{preface/declaration.tex}
 \input{preface/acknowledgements.tex}
@@ -21,11 +26,11 @@
 \chapter{Abstract}
 \markboth{\MakeUppercase{Abstract}}{\MakeUppercase{Abstract}}
 \input{preface/abstract1.tex}
-\mainmatter
+%\mainmatter
 \setcounter{chapter}{0}
 
 
-\renewcommand{\dir}{Part1/chapter1/chapter/}
+\newcommand{\dir}{Part1/chapter1/chapter/}
 \input{Part1/chapter1/chapter/chapter1.tex}
 \renewcommand{\dir}{Part1/chapter2/chapter/}
 \input{Part1/chapter2/chapter/chapter2.tex}
@@ -43,14 +48,14 @@ title={References}
 ]
 
 
-\frontmatter
+%\frontmatter
 \pagenumbering{gobble} 
 \part{Technical Report}
 
 \tableofcontents
 \listoftables
 \listoffigures
-\mainmatter
+%\mainmatter
 
 \begin{refsection}
 %S\setcounter{chapter}{0}
@@ -72,4 +77,13 @@ heading=bibintoc,
 title={References}
 ]
 \end{refsection}
+
+\renewcommand{\dir}{../appendices/chapter}
+\appendix
+\renewcommand\thesection{\Alph{section}}
+\addcontentsline{toc}{chapter}{Appendices}
+\chapter{Appendices}
+\input{\dir/appendix1.tex}
+\input{\dir/appendix2.tex}
+\input{\dir/appendix3.tex}
 \end{document}
